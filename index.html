@@ -287,6 +287,304 @@ main{padding:32px 40px 64px}
 .sync-chip[hidden]{display:none}
 .sync-chip:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;background:#8A94A3;vertical-align:1px}
 .sync-chip.ok:before{background:#3DBE86}.sync-chip.syncing:before,.sync-chip.pending:before{background:#E5A92B}.sync-chip.offline:before,.sync-chip.auth:before{background:#E0625B}
+/* ===== sampling: part tabs + per-part mini bars ===== */
+.sampling{padding:20px 20px 22px}
+.sampling-head{flex-direction:row;align-items:center}
+.sampling-progress-summary{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.sampling-progress-card{padding:14px 16px}
+.part-mini-list{display:grid;gap:2px;margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}
+.part-mini{display:grid;grid-template-columns:minmax(70px,1.2fr) 62px minmax(60px,1fr) 46px 16px;align-items:center;gap:10px;width:100%;padding:6px 8px;border:0;border-radius:8px;background:none;font:inherit;font-size:12.5px;color:var(--ink-2);text-align:left;cursor:pointer}
+.part-mini:hover{background:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+.pm-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm-bar{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden;box-shadow:inset 0 0 0 1px rgba(19,25,34,.04)}
+.pm-bar i{display:block;height:100%;border-radius:99px;background:#C5CCD6}
+.part-mini.ok .pm-bar i{background:var(--ok)}.part-mini.ng .pm-bar i{background:var(--red)}.part-mini.pending .pm-bar i{background:var(--amber)}
+.pm-n{font-size:12px;font-weight:650;color:var(--ink-2);white-space:nowrap}
+.pm-state{font-size:12px;font-weight:650;color:var(--muted)}
+.part-mini.ok .pm-state{color:var(--ok-ink)}.part-mini.ng .pm-state{color:var(--red)}.part-mini.pending .pm-state{color:var(--amber-ink)}
+.pm-go{display:grid;place-items:center;color:#A3ACB9;font-size:14px}
+.part-mini:hover .pm-go{color:var(--green)}
+.part-tabs{display:flex;gap:8px;overflow-x:auto;margin:2px 0 14px;padding:2px 2px 8px}
+.part-tab{display:inline-flex;align-items:center;gap:10px;flex:none;padding:8px 12px 8px 14px;border:1px solid var(--line-strong);border-radius:10px;background:#fff;font:inherit;font-weight:650;font-size:13.5px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.part-tab:hover{border-color:var(--green2)}
+.part-tab.active{border-color:var(--green);background:var(--mint);color:var(--green);box-shadow:0 0 0 1px var(--green) inset}
+.pt-chips{display:inline-flex;gap:3px}
+.pt-chip{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;font-size:11px;font-weight:700;background:var(--surface-2);color:#8A94A3}
+.pt-chip.ok{background:var(--ok);color:#fff}.pt-chip.ng{background:var(--red);color:#fff}.pt-chip.pending{background:var(--amber);color:#fff}
+.part-actions{display:flex;gap:12px;flex:none}
+.sampling-lane{scroll-margin-top:90px;transition:box-shadow .3s}
+.sampling-lane.flash{box-shadow:0 0 0 3px rgba(31,106,130,.4)}
+.parts-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:1000px){.sampling-progress-summary,.parts-grid{grid-template-columns:1fr}}
+/* ===== sampling: many parts -> list navigator + compact summary ===== */
+.parts-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:16px;align-items:start;margin-top:4px}
+.part-nav{position:sticky;top:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-1);overflow:hidden}
+.part-nav-tools{display:grid;gap:8px;padding:10px;border-bottom:1px solid var(--line)}
+.part-nav-tools input,.part-nav-tools select{width:100%;box-sizing:border-box;height:36px;padding:0 10px;border:1px solid var(--line-strong);border-radius:9px;background:#fff;font:inherit;font-size:13px}
+.part-nav-list{max-height:560px;overflow-y:auto;padding:6px;display:grid;gap:3px;align-content:start}
+.part-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1px 8px;align-items:center;width:100%;box-sizing:border-box;text-align:left;padding:8px 10px;border:1px solid transparent;border-radius:9px;background:none;font:inherit;cursor:pointer}
+.part-item[hidden]{display:none}
+.part-item:hover{background:#fff}
+.part-item.active{background:var(--mint);border-color:var(--green)}
+.pi-name{font-weight:650;font-size:13.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.part-item.active .pi-name{color:var(--green)}
+.pi-sub{grid-column:1;font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.part-item .pt-chips{grid-row:1/span 2;grid-column:2}
+.part-nav-foot{padding:8px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.part-main{min-width:0}
+.part-step{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:10px;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.part-step button{display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 10px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;font:inherit;font-weight:600;font-size:12.5px;cursor:pointer}
+.part-step button:hover:not(:disabled){background:var(--surface-1)}
+.part-step button:disabled{opacity:.4;cursor:default}
+.part-step .ic{width:14px;height:14px}
+.parts-layout .parts-grid{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.sp-counts{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:12px;font-weight:650;color:var(--ink-2)}
+.sp-counts span:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:#C5CCD6}
+.sp-counts .ok:before{background:var(--ok)}.sp-counts .ng:before{background:var(--red)}.sp-counts .pending:before{background:var(--amber)}
+.sp-strip{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.sq{width:16px;height:16px;padding:0;border:0;border-radius:4px;background:#D5DAE1;cursor:pointer;transition:transform .1s}
+.sq.ok{background:var(--ok)}.sq.ng{background:var(--red)}.sq.pending{background:var(--amber)}
+.sq.cur{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
+.sq:hover{transform:scale(1.25)}
+.pm-more{padding:4px 8px;font-size:12px;color:var(--muted)}
+@media(max-width:1000px){.parts-layout{grid-template-columns:1fr}.part-nav{position:static}.part-nav-list{max-height:220px}}
+/* narrow lanes inside the part navigator layout */
+.parts-layout{grid-template-columns:230px minmax(0,1fr)}
+.parts-layout .sample-add{grid-template-columns:140px minmax(0,1fr)}
+.parts-layout .sample-add input[type=date]{grid-column:1}
+.parts-layout .sample-add .sample-status-buttons{grid-column:2}
+.parts-layout .sample-add textarea,.parts-layout .sample-add .file-pick,.parts-layout .sample-add>button{grid-column:1/-1}
+.parts-layout .sample-entry{grid-template-columns:90px 56px minmax(60px,1fr) 30px;gap:8px}
+.parts-layout .sample-entry .sample-photos{grid-column:1/-1}
+.parts-layout .part-head{flex-wrap:wrap}
+@media(max-width:1000px){.parts-layout{grid-template-columns:1fr}}
+/* ===== due countdown + overview table ===== */
+.due-badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:700;white-space:nowrap;background:var(--surface-2);color:var(--muted);font-variant-numeric:tabular-nums}
+.due-badge.over{background:var(--red);color:#fff}
+.due-badge.red{background:var(--red-soft);color:var(--red)}
+.due-badge.warn{background:var(--amber-soft);color:var(--amber-ink)}
+.due-badge.done{background:var(--ok-soft);color:var(--ok-ink)}
+.due-badge.none{background:none;color:#8A94A3;box-shadow:inset 0 0 0 1px var(--line-strong);font-weight:600}
+.sampling-lane-title{display:flex;align-items:center;gap:8px}
+.sp-due{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--ink-2);font-weight:600}
+.ov-switch{display:inline-flex;padding:3px;border-radius:10px;background:var(--surface-2);gap:2px;margin:0 0 14px}
+.ov-switch button{border:0;background:none;padding:7px 16px;border-radius:8px;font:inherit;font-weight:650;font-size:13px;color:var(--muted);cursor:pointer}
+.ov-switch button.active{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(19,25,34,.12)}
+.ov{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.ov-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 12px;background:var(--surface-1);border-bottom:1px solid var(--line)}
+.ov-tools{display:flex;gap:8px;flex-wrap:wrap}
+.ov-tools input,.ov-tools select{height:36px;padding:0 10px;border:1px solid var(--line-strong);border-radius:9px;background:#fff;font:inherit;font-size:13px}
+.ov-tools input{width:180px}
+.ov-chips{display:flex;gap:8px;font-size:12px;font-weight:700}
+.ov-chips span{padding:4px 10px;border-radius:99px;background:var(--surface-2);color:var(--muted)}
+.ov-chips .over{background:var(--red);color:#fff}.ov-chips .red{background:var(--red-soft);color:var(--red)}.ov-chips .warn{background:var(--amber-soft);color:var(--amber-ink)}
+.ov-wrap{overflow-x:auto;max-height:620px;overflow-y:auto}
+.ov-table{width:100%;border-collapse:collapse;min-width:640px}
+.ov-table th{position:sticky;top:0;z-index:1;text-align:left;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line);font-size:13px;font-weight:650;color:var(--ink-2);vertical-align:bottom}
+.ov-table th small{display:block;margin-top:2px;font-size:11.5px;font-weight:500;color:var(--muted)}
+.ov-table td{padding:0;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+.ov-row[hidden]{display:none}
+.ov-row:hover td{background:var(--surface-1)}
+.ov-name button,.ov-btn{display:flex;width:100%;border:0;background:none;font:inherit;text-align:left;cursor:pointer;color:inherit}
+.ov-name button{flex-direction:column;gap:2px;padding:12px 14px}
+.ov-name b{font-size:14px}.ov-name small{font-size:11.5px;color:var(--muted)}
+.ov-name button:hover b{color:var(--green)}
+.ov-btn{align-items:center;gap:10px;padding:12px 14px;flex-wrap:wrap}
+.ov-st{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;min-width:62px}
+.ov-st:before{content:"";width:9px;height:9px;border-radius:50%;background:#C5CCD6}
+.ov-st.ok{color:var(--ok-ink)}.ov-st.ok:before{background:var(--ok)}
+.ov-st.ng{color:var(--red)}.ov-st.ng:before{background:var(--red)}
+.ov-st.pending{color:var(--amber-ink)}.ov-st.pending:before{background:var(--amber)}
+.ov-st.none{color:var(--muted)}
+.ov-sub{flex:1;min-width:90px;font-size:12px;color:var(--muted)}
+.ov .part-nav-foot{border-top:0}
+/* ===== per-part prep date ===== */
+.opt-tag{margin-left:6px;padding:1px 7px;border-radius:99px;background:var(--surface-2);color:var(--muted);font-size:11px;font-weight:600}
+.comp-prep-done{display:flex;align-items:center;gap:8px;align-self:end;height:42px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.comp-prep-done input{width:18px;height:18px;accent-color:var(--green)}
+.part-step{justify-content:space-between;flex-wrap:wrap}
+.ps-prep{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.ps-prep .ps-label{font-weight:700;color:var(--muted)}
+.ps-prep b{font-variant-numeric:tabular-nums}
+.ps-none{color:#8A94A3}
+.ps-nav{display:flex;align-items:center;gap:8px}
+.pi-prep{font-weight:700}.pi-prep.over,.pi-prep.red{color:var(--red)}.pi-prep.warn{color:var(--amber-ink)}
+.ov-prep-date{font-size:13px;font-weight:650;font-variant-numeric:tabular-nums;min-width:40px}
+.ov-table{min-width:780px}
+/* ===== color plan ===== */
+.sampling-head{flex-wrap:wrap;gap:10px 14px;margin-bottom:14px}
+.prep-inline{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:260px;justify-content:flex-end}
+.prep-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:99px;background:var(--surface-1);border:1px solid var(--line);font-size:12px;white-space:nowrap}
+.prep-pill b{font-weight:650;color:var(--muted)}
+.prep-pill em{font-style:normal;font-weight:750;color:var(--ink);font-variant-numeric:tabular-nums}
+.prep-pill.none em{color:#8A94A3;font-weight:600}
+.prep-pill.over{border-color:var(--red);background:var(--red-soft)}.prep-pill.over em{color:var(--red)}
+.prep-pill.red{background:var(--red-soft);border-color:#F2C6C3}.prep-pill.red em{color:var(--red)}
+.prep-pill.warn{background:var(--amber-soft);border-color:#F1DDAE}.prep-pill.warn em{color:var(--amber-ink)}
+.sampling-actions{display:flex;gap:8px}
+.plan-group+.plan-group{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line-strong)}
+.plan-group[hidden]{display:none}
+.plan-head{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:2px 2px 4px}
+.plan-toggle{display:flex;align-items:center;gap:6px;flex:1;min-width:0;padding:5px 6px;border:0;border-radius:8px;background:none;font:inherit;cursor:pointer;color:var(--ink)}
+.plan-toggle:hover{background:#fff}
+.plan-toggle .ic{width:14px;height:14px;color:var(--muted)}
+.plan-toggle b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plan-count{margin-left:auto;padding:1px 8px;border-radius:99px;background:var(--surface-2);font-size:11.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.plan-actions{display:flex;gap:0;opacity:.0;transition:opacity .12s}
+.plan-head:hover .plan-actions,.plan-head:focus-within .plan-actions{opacity:1}
+.plan-actions .cfg-ic{width:26px;height:26px;font-size:14px}
+.plan-tag{display:inline-block;margin-right:6px;padding:0 7px;border-radius:99px;background:var(--mint);color:var(--green);font-size:11px;font-weight:700}
+.sq.sq-gap{margin-left:8px}
+.plan-body{display:grid;gap:14px}
+.plan-pick{display:flex;flex-wrap:wrap;gap:8px}
+.plan-pick-item{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid var(--line-strong);border-radius:9px;font-weight:600;cursor:pointer;background:#fff}
+.plan-pick-item:has(input:checked){border-color:var(--green);background:var(--mint);color:var(--green)}
+.plan-pick-item input{accent-color:var(--green)}
+.plan-hint{margin:8px 0 0;font-size:12.5px;line-height:1.55;color:var(--muted)}
+.tpl-row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(140px,1.2fr) 130px 110px;gap:12px;align-items:center;padding:10px 16px;border-top:1px solid var(--line-soft)}
+.tpl-row:first-child{border-top:0}
+.tpl-row input[type=text],.tpl-row input:not([type]){height:38px;padding:0 10px;border:1px solid var(--line-strong);border-radius:9px;font:inherit}
+.tpl-check{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.tpl-check input{accent-color:var(--green)}
+@media(max-width:1000px){.prep-inline{justify-content:flex-start;order:3;flex-basis:100%}}
+/* ===== color plan tabs (pill) ===== */
+.plan-tabs{display:flex;align-items:center;justify-content:space-between;gap:10px 14px;margin:0 0 14px;flex-wrap:wrap}
+.plan-tab-list{display:flex;gap:8px;flex-wrap:wrap}
+.plan-tab{display:inline-flex;align-items:center;gap:8px;padding:6px 7px 6px 15px;border:1px solid var(--line-strong);border-radius:99px;background:#fff;font:inherit;font-weight:700;font-size:14px;color:var(--ink-2);cursor:pointer;white-space:nowrap;transition:background .12s,border-color .12s}
+.plan-tab:hover{border-color:var(--green2)}
+.plan-tab.active{background:var(--green);border-color:var(--green);color:#fff}
+.pl-count{padding:1px 9px;border-radius:99px;background:var(--surface-2);font-size:11.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.plan-tab.active .pl-count{background:rgba(255,255,255,.22);color:#fff}
+.pl-flag{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 2px #fff}
+.plan-tab.active .pl-flag{box-shadow:0 0 0 2px var(--green)}
+.plan-actions-bar{display:flex;gap:6px}
+.plan-act{display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 11px;border:1px solid var(--line-strong);border-radius:9px;background:#fff;font:inherit;font-size:12.5px;font-weight:650;color:var(--ink-2);cursor:pointer}
+.plan-act:hover{background:var(--surface-1)}
+.plan-act .ic{width:15px;height:15px}
+.plan-act.danger:hover{background:var(--red-soft);color:var(--red);border-color:#F2C6C3}
+/* ===== empty plan helper ===== */
+.plan-empty{padding:34px 24px;border:1px dashed var(--line-strong);border-radius:12px;background:var(--surface-1);text-align:center}
+.plan-empty h3{margin:0 0 6px;font-size:17px}
+.plan-empty p{margin:0 auto 16px;max-width:520px;font-size:13.5px;line-height:1.6;color:var(--muted)}
+.plan-empty-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.plan-empty-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin-top:16px;font-size:12.5px;color:var(--muted)}
+.chip-add{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 12px 0 9px;border:1px solid var(--line-strong);border-radius:99px;background:#fff;font:inherit;font-size:13px;font-weight:650;color:var(--ink-2);cursor:pointer}
+.chip-add:hover{border-color:var(--green);color:var(--green);background:var(--mint)}
+.chip-add .ic{width:14px;height:14px}
+/* ===== shared parts ===== */
+.share-chip{display:inline-block;margin-right:6px;padding:0 7px;border-radius:99px;background:var(--amber-soft);color:var(--amber-ink);font-size:11px;font-weight:700;vertical-align:1px}
+.share-body{display:grid;gap:10px}
+.share-tools{display:flex;gap:14px}
+.share-group{margin-top:6px}
+.share-group-head{margin-bottom:6px;font-size:13px;font-weight:700;color:var(--green)}
+.share-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;background:#fff;cursor:pointer}
+.share-item:has(input:checked:not(:disabled)){border-color:var(--green);background:var(--mint)}
+.share-item.is-in{background:var(--surface-1);color:var(--muted);cursor:default}
+.share-item input{accent-color:var(--green);width:17px;height:17px}
+.share-item .si-name{font-weight:650}
+.share-item small{color:var(--muted)}
+.share-item em{margin-left:auto;font-style:normal;font-size:12px;font-weight:650;color:var(--muted)}
+#compShareField[hidden]{display:none}
+/* ===== detail header: notice sits beside the title ===== */
+#detail .topbar{flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:12px}
+#detail .head-notice{flex:1 1 380px;margin:0;padding:8px 12px;font-size:12.5px;line-height:1.5}
+#detail .stage-tabs{margin:10px 0 14px}
+/* ===== summary: every part on one glance (multi-column) ===== */
+.part-mini-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:2px 14px;max-height:300px;overflow-y:auto;margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}
+.part-mini{grid-template-columns:minmax(56px,1fr) 44px 58px 44px;gap:8px;padding:5px 8px}
+.part-mini .pm-n{font-size:11.5px;color:var(--muted);font-weight:600}
+/* prep pills sit right next to the title */
+.prep-inline{flex:0 1 auto;justify-content:flex-start;min-width:0;margin-left:6px}
+.sampling-actions{margin-left:auto}
+/* ===== color plan setup table ===== */
+#planDialog{width:min(720px,94vw)}
+.pt-label{display:block;margin:4px 0 8px;font-weight:700;color:var(--ink-2)}
+.pt-head,.pt-row{display:grid;grid-template-columns:28px minmax(120px,1.2fr) minmax(100px,1fr) 70px 32px;gap:8px;align-items:center}
+.pt-head{padding:0 2px 4px;font-size:12px;font-weight:650;color:var(--muted)}
+.pt-table{display:grid;gap:6px;max-height:320px;overflow-y:auto;padding-right:2px}
+.pt-no{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--surface-2);font-size:12px;font-weight:700;color:var(--muted)}
+.pt-row input.pt-name,.pt-row input.pt-mat{height:38px;padding:0 10px;border:1px solid var(--line-strong);border-radius:9px;font:inherit;min-width:0}
+.pt-share{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:650;color:var(--ink-2);cursor:pointer}
+.pt-share input{width:17px;height:17px;accent-color:var(--green)}
+.pt-add{margin-top:8px}
+.plan-copy{padding:12px 14px;border-radius:10px;background:var(--surface-1);border:1px solid var(--line)}
+.pc-title{margin-bottom:8px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.pc-row{display:flex;gap:10px;align-items:baseline;margin-bottom:6px}
+.pc-row b{flex:none;min-width:116px;font-size:13px;color:var(--ink-2)}
+.pc-row span{display:flex;flex-wrap:wrap;gap:6px}
+.pc-row i{font-style:normal;padding:2px 10px;border-radius:99px;background:#fff;border:1px solid var(--line-strong);font-size:12.5px;font-weight:650}
+.pc-row i.sh{background:var(--amber-soft);border-color:#F1DDAE;color:var(--amber-ink)}
+.plan-tab.plan-add{padding:6px 11px;color:var(--muted);border-style:dashed}
+.plan-tab.plan-add:hover{border-color:var(--green);color:var(--green);background:var(--mint)}
+.plan-tab.plan-add .ic{width:16px;height:16px}
+.chip-add em{font-style:normal;margin-left:4px;padding:0 6px;border-radius:99px;background:var(--amber-soft);color:var(--amber-ink);font-size:10.5px;font-weight:700}
+#planFirst[hidden],#planCopy[hidden]{display:none}
+/* ===== Color Plan management board ===== */
+.pb-dialog{width:min(1180px,96vw);max-height:92vh;padding:0;border:0;border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.pb-dialog[open]{display:flex;flex-direction:column}
+.pb-dialog .modal-head{flex-wrap:wrap;gap:12px 16px}
+.pb-new{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.pb-new input{height:38px;padding:0 12px;border:1px solid var(--line-strong);border-radius:9px;font:inherit;min-width:220px}
+.pb-body{overflow:auto;padding:18px 22px 24px;background:var(--surface-1);flex:1}
+.pb-board{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;padding-bottom:6px}
+.pb-table{flex:0 0 auto;width:350px;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
+.pb-table.first{width:440px;border-color:var(--green)}
+.pb-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:var(--green);color:#fff}
+.pb-name{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pb-hacts{display:flex}
+.pb-hacts .cfg-ic{color:#fff;opacity:.85}
+.pb-hacts .cfg-ic:hover:not(:disabled){background:rgba(255,255,255,.2);color:#fff;opacity:1}
+.pb-cols,.pb-row{display:grid;grid-template-columns:minmax(0,1fr) 128px 34px;gap:8px;align-items:center;padding:6px 10px}
+.pb-cols.first,.pb-row.first{grid-template-columns:minmax(0,1fr) 128px 40px 34px}
+.pb-cols{background:#E3EEF2;font-size:12px;font-weight:700;color:var(--ink-2)}
+.pb-row{border-top:1px solid var(--line-soft);min-height:46px}
+.pb-row.is-shared{background:#FFFCF3}
+.pb-nm{height:34px;padding:0 9px;border:1px solid transparent;border-radius:8px;background:transparent;font:inherit;font-weight:650;min-width:0}
+.pb-nm:hover{border-color:var(--line-strong);background:#fff}
+.pb-nm:focus{outline:0;border-color:var(--green);background:#fff}
+.pb-ro{padding:0 9px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pb-date{height:34px;padding:0 6px;border:1px solid var(--line-strong);border-radius:8px;font:inherit;font-size:12.5px;background:#fff;min-width:0}
+.pb-ck{display:grid;place-items:center;cursor:pointer}
+.pb-ck input{width:18px;height:18px;accent-color:var(--green);cursor:pointer}
+.pb-row.linked{background:#FFFCF3}
+.pb-row.linked .pb-ro{color:var(--muted)}
+.pb-lk{grid-column:2/4;display:inline-flex;width:fit-content;padding:2px 10px;border-radius:99px;background:var(--amber-soft);color:var(--amber-ink);font-size:12px;font-weight:700}
+.pb-row.missing .pb-ro{color:#8A94A3;text-decoration:line-through}
+.pb-row.missing .pb-lk{background:var(--surface-2);color:var(--muted)}
+.pb-add{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:var(--surface-1)}
+.pb-add input{flex:1;min-width:0;height:36px;padding:0 10px;border:1px solid var(--line-strong);border-radius:9px;font:inherit}
+.pb-note{margin:14px 2px 0;font-size:12.5px;line-height:1.6;color:var(--muted);max-width:900px}
+.pb-empty{padding:48px 24px;text-align:center;color:var(--muted)}
+.pb-empty h3{margin:0 0 8px;color:var(--ink)}
+.pb-empty p{margin:0 auto;max-width:560px;line-height:1.6}
+@media(max-width:700px){.pb-table,.pb-table.first{width:86vw}}
+/* prep countdown inside the completion lists */
+.part-mini .pm-name{display:flex;flex-direction:row;align-items:baseline;gap:7px;white-space:nowrap;overflow:hidden;min-width:0}
+.part-mini .pm-nt{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm-prep{flex:none;font-size:11px;font-weight:700;line-height:1.2;color:var(--muted);white-space:nowrap}
+.part-mini{grid-template-columns:minmax(110px,1fr) 44px 52px 44px}
+.pm-prep.over,.pm-prep.red{color:var(--red)}
+.pm-prep.warn{color:var(--amber-ink)}
+.pb-head.warn{background:#8A6A1F}
+.pb-sub{font-size:12px;opacity:.85}
+.pb-table.uncat{border-color:#E3C77A}
+.pb-cols.uncat,.pb-row.uncat{grid-template-columns:minmax(0,1fr) 140px 34px}
+.pb-move{height:34px;padding:0 6px;border:1px solid var(--line-strong);border-radius:8px;font:inherit;font-size:12.5px;background:#fff;min-width:0}
+.pb-sub-note{margin:0;padding:10px 12px;font-size:12px;line-height:1.55;color:var(--muted);border-top:1px solid var(--line-soft);background:var(--surface-1)}
+/* ===== size sync tick ===== */
+.dim-hint{display:block;margin-top:3px;font-size:12px;font-weight:500;color:var(--muted)}
+.overall-dimensions-table th.dim-sync,.overall-dimensions-table td.dim-sync{width:54px;text-align:center}
+.overall-dimensions-table td.dim-sync input{width:18px;height:18px;accent-color:var(--green);cursor:pointer;vertical-align:middle}
+.size-sku{display:inline-block;margin-left:6px;padding:1px 9px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line-strong);font-size:11.5px;font-weight:700;color:var(--ink-2);vertical-align:1px}
+.size-pending td{color:var(--muted)}
+.size-pending .size-name-col small{color:#B07A17}
+/* approval columns: three equal slots, header and buttons share the same centres */
+.change-detail-row{grid-template-columns:minmax(0,5fr) minmax(0,5fr) minmax(0,5fr) minmax(0,29fr)}
+/* first table only: row order controls */
+.pb-table.first{width:510px}
+.pb-cols.first,.pb-row.first{grid-template-columns:minmax(0,1fr) 124px 36px 60px 30px}
+.pb-mv{display:flex;justify-content:center}
+.pb-mv .cfg-ic{width:26px;height:30px}
 /* dialogs */
 .field label{line-height:20px;min-height:20px}
 .field input:not([type=checkbox]),.field select{height:42px;padding-top:0;padding-bottom:0}
@@ -357,7 +655,7 @@ dialog::backdrop{background:rgba(14,19,27,.5)}
   <form id="competitorForm">
     <div class="modal-head"><h2 id="competitorTitle">新增競品尺寸</h2><button type="button" class="x" onclick="competitorDialog.close()" aria-label="關閉"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
     <div class="modal-body form-grid">
-      <input type="hidden" name="id"><input type="hidden" name="kind" value="comp">
+      <input type="hidden" name="id"><input type="hidden" name="rowid"><input type="hidden" name="kind" value="comp">
       <div class="field"><label id="compNameLabel">競品名稱 *</label><input name="name" required placeholder="例如：MacBook Air 13" autocomplete="off"></div>
       <div class="field" id="compNoteField"><label>備註</label><input name="note" placeholder="例如：品牌／年份／來源" autocomplete="off"></div>
       <div class="field full size-hint hidden" id="sizeEditHint">修改會寫回該機種「設計歷程」中提供這個數值的那筆記錄；欄位清空則改用更早記錄中的數值。</div>
@@ -428,15 +726,23 @@ dialog::backdrop{background:rgba(14,19,27,.5)}
     <div class="modal-actions"><button type="button" class="btn" onclick="scheduleDialog.close()">取消</button><button class="btn primary">儲存時程</button></div>
   </form>
 </dialog>
+<datalist id="planNameList"></datalist><datalist id="partNameList"></datalist>
 <dialog id="componentDialog">
   <form id="componentForm">
-    <div class="modal-head"><h2>新增打樣部件</h2><button type="button" class="x" onclick="componentDialog.close()" aria-label="關閉"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
+    <input type="hidden" name="id">
+    <div class="modal-head"><h2 id="compTitle">修改打樣部件</h2><button type="button" class="x" onclick="componentDialog.close()" aria-label="關閉"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
     <div class="modal-body form-grid">
-      <div class="field"><label>部件名稱 *</label><input name="name" required placeholder="例如：陽極中心樣、Touch Pad"></div>
-      <div class="field"><label>材質 *</label><input name="material" required placeholder="例如：鋁材、玻璃背印"></div>
+      <div class="field"><label>部件名稱 *</label><input name="name" required autocomplete="off"></div>
+      <div class="field"><label>材質 <span class="opt-tag">選填</span></label><input name="material" placeholder="例如：鋁材、玻璃背印"></div>
+      <div class="field"><label>備料時間 <span class="opt-tag">選填</span></label><input type="date" name="prepDate"></div>
+      <label class="comp-prep-done"><input type="checkbox" name="prepDone"><span>已備料</span></label>
     </div>
-    <div class="modal-actions"><button type="button" class="btn" onclick="componentDialog.close()">取消</button><button class="btn primary">新增部件</button></div>
+    <div class="modal-actions"><button type="button" class="btn" onclick="componentDialog.close()">取消</button><button class="btn primary" id="compSubmit">儲存修改</button></div>
   </form>
+</dialog>
+<dialog id="planBoardDlg" class="pb-dialog">
+  <div class="modal-head"><h2>Color Plan 管理</h2><div class="pb-new"><input id="boardNewPlan" placeholder="新顏色名稱，例如：藍色" onkeydown="if(event.key==='Enter')boardAddPlan()" autocomplete="off" list="planNameList"><button type="button" class="btn primary" onclick="boardAddPlan()">＋ 新增顏色列表</button></div><button type="button" class="x" onclick="planBoardDlg.close()" aria-label="關閉"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
+  <div class="pb-body" id="planBoardBody"></div>
 </dialog>
 <dialog id="overallDimDialog">
   <form id="overallDimForm">
@@ -501,7 +807,7 @@ const STAGES = ['3D','SR','ER','PR','MP'];
 const PREP_STAGES = ['SR','ER','PR','MP'];
 const NPI_STAGES = ['SR','ER','PR','MP'];
 const DETAIL_TABS = ['設變歷程','3D','打樣','NPI'];
-const DETAIL_TAB_LABELS = {'設變歷程':'設計歷程','3D':'3D/模型','打樣':'中心限度打樣'};
+const DETAIL_TAB_LABELS = {'設變歷程':'設計歷程','3D':'3D/模型 Check','打樣':'中心限度打樣','NPI':'NPI Check'};
 const NB3D_GUIDANCE = "提供BU檢討外觀時，請勿提供半成品；原方案與優化方案皆須以最終完整效果呈現，以利整體效果比對。";
 const THREED_CHECKLIST = [
   {
@@ -900,12 +1206,106 @@ function samplingTypeProgress(p,type){const key=type==='center'?'centerSamples':
 function samplingProgress(p){return Math.round((samplingTypeProgress(p,'center')+samplingTypeProgress(p,'limit'))/2);}
 function samplingSummary(p){const parts=p.components||[];return parts.length?`<span>中心色 ${samplingTypeProgress(p,'center')}%</span><span>限度樣 ${samplingTypeProgress(p,'limit')}%</span>`:'尚未新增部件';}
 function renderPrepReminders(p){return `<div class="prep-reminders">${PREP_STAGES.map(stage=>{const date=p.dates?.['prep'+stage]||'';return `<div class="prep-reminder"><b>${stage} 備料</b><span>${date?dateText(date):'未設定'}</span></div>`}).join('')}</div>`;}
-function renderSamplingLane(p,c,key,label){const samples=[...(c[key]||[])].sort((a,b)=>b.date.localeCompare(a.date)),latest=samples[0],typeClass=key==='centerSamples'?'center':'limit',summary=latest?`最近紀錄 ${dateText(latest.date)}（${elapsedDays(latest.date)} 天前）`:'尚無紀錄';return `<article class="part-card sampling-lane ${typeClass}"><div class="part-head"><div><div class="sampling-lane-title">${label}</div><h3>${esc(c.name)}</h3><div class="part-meta">材質：${esc(c.material||'未設定')} · ${summary}</div></div>${key==='centerSamples'?`<button class="link" style="color:var(--red)" onclick="removeComponent('${p.id}','${c.id}')">移除部件</button>`:''}</div>${samples.length?`<div class="sample-list">${samples.map((s,i)=>{const prior=samples[i+1],gap=prior?elapsedDays(prior.date,s.date):null,status=s.judgment==='OK'?'ok':s.judgment==='NG'?'ng':'pending';return `<div class="sample-entry"><div class="sample-line"><b>第 ${samples.length-i} 次紀錄</b><br>${dateText(s.date)}${gap!==null?`<div class="sample-gap">距上次 ${gap} 天</div>`:''}</div><div><span class="sample-status ${status}">${esc(s.judgment||'待確認')}</span></div><div class="sample-line">${esc(s.comment||'—')}</div>${s.photos?.length?`<div class="sample-photos">${s.photos.map((src,n)=>`<a href="${src}" target="_blank" rel="noopener" title="查看${label}照片"><img src="${src}" alt="${esc(c.name)}${label}照片 ${n+1}" loading="lazy"></a>`).join('')}</div>`:''}<button type="button" class="sample-delete" onclick="removeSample('${p.id}','${c.id}','${s.id}','${key}')" aria-label="刪除這筆${label}紀錄" title="刪除這筆${label}紀錄">${ICON.x}</button></div>`}).join('')}</div>`:`<div class="sample-empty">尚無${label}紀錄，新增第一筆日期。</div>`}<form class="sample-add" onsubmit="addSampleFromForm(event,'${p.id}','${c.id}','${key}')"><input name="date" type="date" value="${today()}" required aria-label="${label}日期"><div class="sample-status-buttons" role="group" aria-label="${label}判定"><input name="judgment" type="hidden"><button type="button" class="sample-status-btn" onclick="setSampleStatus(this,'OK')" aria-pressed="false">OK</button><button type="button" class="sample-status-btn" onclick="setSampleStatus(this,'NG')" aria-pressed="false">NG</button></div><textarea name="comment" placeholder="Comment"></textarea><label class="file-pick">打樣照片（可多選）<input name="photos" type="file" accept="image/*" multiple></label><button class="btn primary" type="submit">新增紀錄</button></form></article>`;}
-function renderSampling(p){const parts=p.components||[],center=samplingTypeProgress(p,'center'),limit=samplingTypeProgress(p,'limit'),centerReady=parts.filter(c=>[...(c.centerSamples||[])].sort((a,b)=>b.date.localeCompare(a.date))[0]?.judgment==='OK').length,limitReady=parts.filter(c=>[...(c.limitSamples||[])].sort((a,b)=>b.date.localeCompare(a.date))[0]?.judgment==='OK').length;return `<section class="card sampling"><div class="sampling-head"><h2>部件打樣進度｜ER前中心樣完成；PR前限度完成</h2><button class="btn soft" onclick="componentDialog.showModal()">${ICON.plus}新增部件</button></div><p class="sampling-help">每個部件自動建立中心色與限度樣兩欄；兩種樣品分開新增紀錄。材質設定一次，每筆紀錄可填日期、OK／NG、Comment及照片。</p><div class="sampling-progress-summary"><div class="sampling-progress-card"><div class="sampling-progress-head"><span>中心色完成率</span><b>${center}%</b></div><div class="progress"><span style="width:${center}%"></span></div><div class="sampling-progress-note">${centerReady} / ${parts.length} 個部件通過</div></div><div class="sampling-progress-card"><div class="sampling-progress-head"><span>限度樣完成率</span><b>${limit}%</b></div><div class="progress"><span style="width:${limit}%"></span></div><div class="sampling-progress-note">${limitReady} / ${parts.length} 個部件通過</div></div></div>${renderPrepReminders(p)}${parts.length?`<div class="parts-grid">${parts.map(c=>renderSamplingLane(p,c,'centerSamples','中心色')+renderSamplingLane(p,c,'limitSamples','限度樣')).join('')}</div>`:'<div class="sample-empty">尚未新增部件。按「新增部件」後，會同時建立中心色與限度樣紀錄區。</div>'}</section>`;}
+function renderSamplingLane(p,c,key,label){const samples=[...(c[key]||[])].sort((a,b)=>b.date.localeCompare(a.date)),latest=samples[0],typeClass=key==='centerSamples'?'center':'limit',summary=latest?`最近紀錄 ${dateText(latest.date)}（${elapsedDays(latest.date)} 天前）`:'尚無紀錄';return `<article class="part-card sampling-lane ${typeClass}" id="lane-${c.id}-${key}"><div class="part-head"><div><div class="sampling-lane-title">${label} ${dueBadge(partDue(p,key),sampleState(c,key).cls)}</div><h3>${esc(partLabel(c))}</h3><div class="part-meta">材質：${esc(c.material||'未設定')} · ${summary}${isShared(c)?` · <span class="share-chip">所有顏色共用同一份</span>`:''}</div></div>${key==='centerSamples'?`<span class="part-actions"><button class="link" onclick="openComponentDialog('${c.id}')">修改部件</button></span>`:''}</div>${samples.length?`<div class="sample-list">${samples.map((s,i)=>{const prior=samples[i+1],gap=prior?elapsedDays(prior.date,s.date):null,status=s.judgment==='OK'?'ok':s.judgment==='NG'?'ng':'pending';return `<div class="sample-entry"><div class="sample-line"><b>第 ${samples.length-i} 次紀錄</b><br>${dateText(s.date)}${gap!==null?`<div class="sample-gap">距上次 ${gap} 天</div>`:''}</div><div><span class="sample-status ${status}">${esc(s.judgment||'待確認')}</span></div><div class="sample-line">${esc(s.comment||'—')}</div>${s.photos?.length?`<div class="sample-photos">${s.photos.map((src,n)=>`<a href="${src}" target="_blank" rel="noopener" title="查看${label}照片"><img src="${src}" alt="${esc(partLabel(c))}${label}照片 ${n+1}" loading="lazy"></a>`).join('')}</div>`:''}<button type="button" class="sample-delete" onclick="removeSample('${p.id}','${c.id}','${s.id}','${key}')" aria-label="刪除這筆${label}紀錄" title="刪除這筆${label}紀錄">${ICON.x}</button></div>`}).join('')}</div>`:`<div class="sample-empty">尚無${label}紀錄，新增第一筆日期。</div>`}<form class="sample-add" onsubmit="addSampleFromForm(event,'${p.id}','${c.id}','${key}')"><input name="date" type="date" value="${today()}" required aria-label="${label}日期"><div class="sample-status-buttons" role="group" aria-label="${label}判定"><input name="judgment" type="hidden"><button type="button" class="sample-status-btn" onclick="setSampleStatus(this,'OK')" aria-pressed="false">OK</button><button type="button" class="sample-status-btn" onclick="setSampleStatus(this,'NG')" aria-pressed="false">NG</button></div><textarea name="comment" placeholder="Comment"></textarea><label class="file-pick">打樣照片（可多選）<input name="photos" type="file" accept="image/*" multiple></label><button class="btn primary" type="submit">新增紀錄</button></form></article>`;}
+const PLAN_NONE='__none';
+function isShared(c){return Boolean(c.shared)||(c.sharedWith||[]).length>0;}
+function newPart(name,plan,material,shared){return {id:uid(),name,plan,shared:Boolean(shared),material:material||'',prepDate:'',prepDone:false,centerSamples:[],limitSamples:[]};}
+function partNames(p){const seen=new Map();planSortedP(p).forEach(c=>{if(isShared(c)||!c.plan)return;const k=c.name.trim().toLowerCase();if(!seen.has(k))seen.set(k,{name:c.name,material:c.material||''});});return [...seen.values()];}
+function partLabel(c){return (isShared(c)||!c.plan)?c.name:`${c.plan}-${c.name}`;}
+function inPlan(c,key){if(!key||key==='all')return true;if(key===PLAN_NONE)return !c.plan&&!isShared(c);return isShared(c)||c.plan===key;}
+function planNames(parts){const named=[...new Set(parts.map(c=>c.plan||'').filter(Boolean))];return parts.some(c=>!c.plan&&!isShared(c))?[...named,'']:named;}
+function planOrder(p){const set=[];(p.colorPlans||[]).forEach(n=>{if(n&&!set.includes(n))set.push(n);});(p.components||[]).forEach(c=>{if(c.plan&&!set.includes(c.plan))set.push(c.plan);});if((p.components||[]).some(c=>!c.plan&&!isShared(c)))set.push('');return set;}
+function planSortedP(p){const order=planOrder(p);return (p.components||[]).map((c,i)=>({c,i})).sort((a,b)=>order.indexOf(a.c.plan||'')-order.indexOf(b.c.plan||'')||a.i-b.i).map(x=>x.c);}
+function planSorted(parts){const order=planNames(parts);return parts.map((c,i)=>({c,i})).sort((a,b)=>order.indexOf(a.c.plan||'')-order.indexOf(b.c.plan||'')||a.i-b.i).map(x=>x.c);}
+function planMatches(plan){const f=state.partPlan;return !f||f==='all'||(f===PLAN_NONE?!plan:plan===f);}
+function curProject(){return db.projects.find(x=>x.id===state.projectId);}
+function fillPlanList(p){const el=document.getElementById('planNameList');if(el)el.innerHTML=(p?planOrder(p):[]).filter(Boolean).map(n=>`<option value="${esc(n)}">`).join('');const pn=document.getElementById('partNameList');if(pn)pn.innerHTML=partTemplate().map(t=>`<option value="${esc(t.name)}">`).join('');}
+function togglePlan(key){const f={...(state.planCollapsed||{})};f[key]=!f[key];state.planCollapsed=f;renderDetail();}
+function selectPlanTab(key){state.partPlan=key;renderDetail();}
+function openPlanBoard(){const p=curProject();if(!p)return;fillPlanList(p);planBoardDlg.showModal();renderPlanBoard();}
+function renamePartEverywhere(p,c,name){const oldKey=c.name.trim().toLowerCase(),newKey=name.toLowerCase(),group=p.components.filter(d=>d.name.trim().toLowerCase()===oldKey&&(isShared(c)?d===c:!isShared(d))),clash=p.components.some(d=>!group.includes(d)&&d.name.trim().toLowerCase()===newKey&&group.some(g=>isShared(g)||isShared(d)||(g.plan||'')===(d.plan||'')));if(clash){alert(`已經有名為「${name}」的部件`);return false;}group.forEach(d=>{d.name=name;});return true;}
+function boardRename(id,val){const p=curProject(),c=p&&p.components.find(x=>x.id===id),name=String(val||'').trim();if(!c)return;if(!name||name===c.name||!renamePartEverywhere(p,c,name)){renderPlanBoard();return;}save('部件已重新命名');}
+function boardSetPrep(id,val){const p=curProject(),c=p&&p.components.find(x=>x.id===id);if(!c)return;c.prepDate=val||'';if(val)c.prepDone=false;save('備料時間已更新');}
+function boardShare(id,on){const p=curProject(),c=p&&p.components.find(x=>x.id===id);if(!c)return;if(!setPartShared(id,on,c.plan))renderPlanBoard();}
+function boardGroup(p,c){const key=c.name.trim().toLowerCase();return p.components.filter(d=>d.name.trim().toLowerCase()===key&&(isShared(c)?d===c:!isShared(d)));}
+function boardRecs(list){return list.reduce((n,d)=>n+(d.centerSamples||[]).length+(d.limitSamples||[]).length,0);}
+function boardRemove(id){const p=curProject(),c=p&&p.components.find(x=>x.id===id);if(!c)return;const g=boardGroup(p,c),recs=boardRecs(g);if(!confirm(`移除部件「${c.name}」？\n${isShared(c)?'這是共用部件，':''}${g.length>1?`所有顏色共 ${g.length} 份都會移除`:'會從所有顏色移除'}${recs?`，含 ${recs} 筆打樣紀錄`:''}。`)){return;}p.components=p.components.filter(d=>!g.includes(d));save('部件已移除');}
+function boardRemoveCopy(id){const p=curProject(),c=p&&p.components.find(x=>x.id===id);if(!c)return;const recs=boardRecs([c]);if(!confirm(`從「${c.plan}」移除「${c.name}」？${recs?`\n其中 ${recs} 筆打樣紀錄會一併刪除。`:''}`))return;p.components=p.components.filter(d=>d!==c);save('已從此顏色移除');}
+function boardRestore(plan,name){const p=curProject();if(!p)return;const src=p.components.find(c=>!isShared(c)&&c.name.trim().toLowerCase()===String(name).trim().toLowerCase());p.components.push(newPart(name,plan,(src&&src.material)||'',false));save(`已補回「${name}」`);}
+function boardMoveUncat(id,plan){const p=curProject(),c=p&&p.components.find(x=>x.id===id);if(!c||!plan){renderPlanBoard();return;}if(p.components.some(d=>d!==c&&d.name.trim().toLowerCase()===c.name.trim().toLowerCase()&&inPlan(d,plan))){alert(`「${plan}」已經有名為「${c.name}」的部件，無法移入。請先改名，或刪除其中一個。`);renderPlanBoard();return;}c.plan=plan;state.partPlan=plan;save(`「${c.name}」已移到「${plan}」`);}
+function boardMove(id,dir){const p=curProject();if(!p)return;const first=planOrder(p).filter(Boolean)[0],idxs=p.components.map((c,i)=>c.plan===first?i:-1).filter(i=>i>=0),k=idxs.findIndex(i=>p.components[i].id===id),j=k+dir;if(k<0||j<0||j>=idxs.length)return;const a=idxs[k],b=idxs[j];[p.components[a],p.components[b]]=[p.components[b],p.components[a]];save('部件順序已調整（所有顏色同步）');}
+function masterRank(p){const first=planOrder(p).filter(Boolean)[0],m=new Map();(p.components||[]).filter(c=>c.plan===first).forEach((c,i)=>{const k=c.name.trim().toLowerCase();if(!m.has(k))m.set(k,i);});return m;}
+function scopeSort(p,list){const cur=state.partPlan;if(!cur||cur==='all'||cur===PLAN_NONE)return list;const r=masterRank(p),rk=c=>{const k=c.name.trim().toLowerCase();return r.has(k)?r.get(k):1e6;};return list.map((c,i)=>({c,i})).sort((a,b)=>rk(a.c)-rk(b.c)||a.i-b.i).map(x=>x.c);}
+function boardRemoveUncat(id){const p=curProject(),c=p&&p.components.find(x=>x.id===id);if(!c)return;const recs=boardRecs([c]);if(!confirm(`刪除未分類部件「${c.name}」？${recs?`\n其中 ${recs} 筆打樣紀錄會一併刪除。`:''}`))return;p.components=p.components.filter(d=>d!==c);save('未分類部件已刪除');}
+function boardAddPart(){const p=curProject(),inp=document.getElementById('boardNewPart'),name=(inp.value||'').trim(),plans=planOrder(p).filter(Boolean);if(!name){inp.focus();return;}if(!plans.length){alert('請先新增 Color Plan');return;}if(p.components.some(c=>c.name.trim().toLowerCase()===name.toLowerCase())){alert('已經有同名的部件');return;}plans.forEach(pl=>p.components.push(newPart(name,pl,'',false)));inp.value='';state.partPlan=plans[0];save(`已新增「${name}」，每個顏色各一份（需要共用請勾選「共用」）`);}
+function boardAddPlan(){const p=curProject(),inp=document.getElementById('boardNewPlan'),name=(inp.value||'').trim();if(!p)return;if(!name){inp.focus();return;}if(planOrder(p).includes(name)){alert('已經有同名的 Color Plan');return;}if(!p.components)p.components=[];if(!p.colorPlans)p.colorPlans=[];const has=p.components.some(c=>c.plan||isShared(c));p.colorPlans.push(name);let msg;if(!has){partTemplate().forEach(t=>p.components.push(newPart(t.name,name,t.material||'',!t.perPlan)));msg=`已建立「${name}」並帶入範本部件，請確認名稱與「共用」勾選`;}else{const per=partNames(p);per.forEach(x=>p.components.push(newPart(x.name,name,x.material,false)));msg=`已新增「${name}」，自動複製 ${per.length} 個部件；共用部件不重複`;}inp.value='';state.partPlan=name;state.partView='list';const first=p.components.find(c=>inPlan(c,name));if(first)state.partId=first.id;save(msg);}
+function renderPlanBoard(){const el=document.getElementById('planBoardBody'),p=curProject();if(!el||!p)return;const comps=p.components||[],plans=planOrder(p).filter(Boolean),first=plans[0],key=n=>String(n).trim().toLowerCase();
+ const unc=comps.filter(c=>!c.plan&&!isShared(c)),uncTbl=unc.length?`<section class="pb-table uncat"><div class="pb-head warn"><b class="pb-name">未分類</b><span class="pb-sub">舊資料</span></div><div class="pb-cols uncat"><span>部件</span><span>移到顏色</span><span></span></div>${unc.map(c=>`<div class="pb-row uncat"><input class="pb-nm" value="${esc(c.name)}" onchange="boardRename('${c.id}',this.value)" aria-label="部件名稱"><select class="pb-move" onchange="boardMoveUncat('${c.id}',this.value)" ${plans.length?'':'disabled'} aria-label="移到顏色"><option value="">${plans.length?'選擇顏色…':'請先新增顏色'}</option>${plans.map(pl=>`<option value="${esc(pl)}">${esc(pl)}</option>`).join('')}</select><button type="button" class="cfg-ic danger" title="刪除這個部件" onclick="boardRemoveUncat('${c.id}')">${ICON.x}</button></div>`).join('')}<p class="pb-sub-note">這些部件不屬於任何 Color Plan（舊版建立）。可移到某個顏色，或直接刪除。</p></section>`:'';
+ if(!plans.length){el.innerHTML=`<div class="pb-empty"><h3>還沒有 Color Plan</h3><p>在上方輸入顏色名稱，按「＋ 新增顏色列表」。第一個顏色會帶入範本部件（${esc(partTemplate().map(t=>t.name).join('、'))}），您可以直接改名、移除、新增，並勾選哪些部件是各顏色共用。之後新增的顏色會自動複製。</p></div>${uncTbl?`<div class="pb-board">${uncTbl}</div>`:''}`;return;}
+ const master=comps.filter(c=>c.plan===first),dateIn=c=>`<input type="date" class="pb-date" value="${esc(c.prepDate||'')}" onchange="boardSetPrep('${c.id}',this.value)" aria-label="備料時間">`;
+ const head=(pl,isFirst)=>`<div class="pb-head"><b class="pb-name" title="${esc(pl)}">${esc(pl)}</b><span class="pb-hacts"><button type="button" class="cfg-ic" title="重新命名" onclick="renamePlan(${jsAttr(pl)})">${ICON.edit}</button><button type="button" class="cfg-ic" title="刪除這個顏色" onclick="deletePlan(${jsAttr(pl)})">${ICON.trash}</button></span></div><div class="pb-cols ${isFirst?'first':''}"><span>部件</span><span>備料</span>${isFirst?'<span>共用</span><span>順序</span>':''}<span></span></div>`;
+ const firstTbl=`<section class="pb-table first">${head(first,true)}${master.map((c,i)=>`<div class="pb-row first ${isShared(c)?'is-shared':''}"><input class="pb-nm" value="${esc(c.name)}" onchange="boardRename('${c.id}',this.value)" aria-label="部件名稱">${dateIn(c)}<label class="pb-ck" title="勾選後，所有顏色共用同一份（備料與紀錄也共用）"><input type="checkbox" ${isShared(c)?'checked':''} onchange="boardShare('${c.id}',this.checked)"></label><span class="pb-mv"><button type="button" class="cfg-ic" title="上移（所有顏色同步）" aria-label="上移" ${i===0?'disabled':''} onclick="boardMove('${c.id}',-1)">${ICON.up}</button><button type="button" class="cfg-ic" title="下移（所有顏色同步）" aria-label="下移" ${i===master.length-1?'disabled':''} onclick="boardMove('${c.id}',1)">${ICON.down}</button></span><button type="button" class="cfg-ic danger" title="移除這個部件（所有顏色）" onclick="boardRemove('${c.id}')">${ICON.x}</button></div>`).join('')}<div class="pb-add"><input id="boardNewPart" placeholder="新增部件名稱…" list="partNameList" onkeydown="if(event.key==='Enter')boardAddPart()" autocomplete="off"><button type="button" class="btn" onclick="boardAddPart()">${ICON.plus}新增部件</button></div></section>`;
+ const others=plans.slice(1).map(pl=>{const mine=comps.filter(c=>c.plan===pl&&!isShared(c)),names=new Set(master.map(m=>key(m.name)));
+  const rows=master.map(m=>{if(isShared(m))return `<div class="pb-row linked"><span class="pb-ro">${esc(m.name)}</span><span class="pb-lk">共用「${esc(first)}」</span></div>`;const cp=mine.find(c=>key(c.name)===key(m.name));return cp?`<div class="pb-row"><span class="pb-ro">${esc(cp.name)}</span>${dateIn(cp)}<button type="button" class="cfg-ic danger" title="從「${esc(pl)}」移除" onclick="boardRemoveCopy('${cp.id}')">${ICON.x}</button></div>`:`<div class="pb-row missing"><span class="pb-ro">${esc(m.name)}</span><span class="pb-lk">未加入</span><button type="button" class="cfg-ic" title="補回" onclick="boardRestore(${jsAttr(pl)},${jsAttr(m.name)})">${ICON.plus}</button></div>`;}).join('');
+  const extras=mine.filter(c=>!names.has(key(c.name))).map(c=>`<div class="pb-row"><input class="pb-nm" value="${esc(c.name)}" onchange="boardRename('${c.id}',this.value)" aria-label="部件名稱">${dateIn(c)}<button type="button" class="cfg-ic danger" title="從「${esc(pl)}」移除" onclick="boardRemoveCopy('${c.id}')">${ICON.x}</button></div>`).join('');
+  return `<section class="pb-table">${head(pl,false)}${rows}${extras}</section>`;}).join('');
+ el.innerHTML=`<div class="pb-board">${firstTbl}${others}${uncTbl}</div><p class="pb-note">第一個顏色是主清單：在這裡新增、改名、調整順序、移除部件，其他顏色會自動跟著複製並使用相同順序。勾選「共用」的部件所有顏色同一份（備料與打樣紀錄也共用），其他顏色顯示為「共用「${esc(first)}」」。沒有勾選的部件，每個顏色各自一份、各自記錄。</p>`;}
+function setPartShared(id,on,ownerOverride){const p=curProject(),c=p&&(p.components||[]).find(x=>x.id===id);if(!c)return false;const key=c.name.trim().toLowerCase(),same=p.components.filter(d=>d!==c&&d.name.trim().toLowerCase()===key);
+ if(on){if(isShared(c))return false;const others=same.filter(d=>!isShared(d)),recs=others.reduce((n,d)=>n+(d.centerSamples||[]).length+(d.limitSamples||[]).length,0);if(others.length&&!confirm(`其他顏色也有「${c.name}」。設為共用後只保留這一份，其他 ${others.length} 份${recs?`（含 ${recs} 筆打樣紀錄）`:''}會被刪除。確定？`))return false;p.components=p.components.filter(d=>!others.includes(d));c.shared=true;delete c.sharedWith;save(`「${c.name}」已設為共用`);return true;}
+ const plans=planOrder(p).filter(Boolean),cur=state.partPlan,owner=ownerOverride||((cur&&cur!=='all'&&cur!==PLAN_NONE)?cur:(c.plan||plans[0]||''));if(!confirm(`取消共用後，「${c.name}」只會留在「${owner||'目前的顏色'}」，其他顏色各自建立一份空白的「${c.name}」。確定？`))return false;c.shared=false;delete c.sharedWith;c.plan=owner;plans.filter(g=>g!==owner).forEach(g=>{if(!p.components.some(d=>d.plan===g&&d.name.trim().toLowerCase()===key))p.components.push(newPart(c.name,g,c.material,false));});save(`「${c.name}」已取消共用`);return true;}
+function renderEmptyPlan(p,plan){return `<div class="plan-empty"><h3>「${esc(plan)}」還沒有部件</h3><p>部件請到 Color Plan 管理加入或調整。</p><div class="plan-empty-actions"><button type="button" class="btn primary" onclick="openPlanBoard()">${ICON.edit}開啟 Color Plan 管理</button></div></div>`;}
+function renamePlan(plan){const p=curProject();if(!p)return;const name=(prompt('Color Plan 名稱',plan)||'').trim();if(!name||name===plan)return;const mine=p.components.filter(c=>(c.plan||'')===plan);if(planOrder(p).includes(name)){alert('已經有同名的 Color Plan');return;}mine.forEach(c=>{c.plan=name;});p.components.forEach(c=>{if(c.sharedWith)c.sharedWith=c.sharedWith.map(n=>n===plan?name:n);});p.colorPlans=(p.colorPlans||[]).map(n=>n===plan?name:n);if(state.partPlan===plan)state.partPlan=name;save('Color Plan 已重新命名');}
+function deletePlan(plan){const p=curProject();if(!p)return;const others=planOrder(p).filter(g=>g&&g!==plan),owned=p.components.filter(c=>(c.plan||'')===plan),keep=owned.filter(isShared),gone=owned.filter(c=>!isShared(c)),recs=gone.reduce((n,c)=>n+(c.centerSamples||[]).length+(c.limitSamples||[]).length,0);if(!confirm(`刪除 Color Plan「${plan}」？\n會移除它專屬的 ${gone.length} 個部件${recs?`（含 ${recs} 筆打樣紀錄）`:''}。${keep.length?`\n共用的 ${keep.length} 個部件會保留，其他顏色仍然可以使用。`:''}`))return;keep.forEach(c=>{c.plan=others[0]||'';});p.components=p.components.filter(c=>!gone.includes(c));p.colorPlans=(p.colorPlans||[]).filter(n=>n!==plan);if(state.partPlan===plan)state.partPlan='all';save('Color Plan 已刪除');}
+function renderPrepInline(p){return `<div class="prep-inline">${PREP_STAGES.map(stage=>{const date=p.dates?.['prep'+stage]||'',i=date?dueInfo(date,''):null;return `<span class="prep-pill ${i?i.t:'none'}" title="${stage} 備料${date?`：${dateText(date)}（${i.text}）`:'：尚未設定，請到「編輯時程」'}"><b>${stage} 備料</b><em>${date?dateText(date):'未設定'}</em></span>`;}).join('')}</div>`;}
+function sampleLatest(c,key){return [...(c[key]||[])].sort((a,b)=>b.date.localeCompare(a.date))[0];}
+function sampleState(c,key){const l=sampleLatest(c,key),n=(c[key]||[]).length;if(!l)return {cls:'none',text:'未開始',w:0,n};if(l.judgment==='OK')return {cls:'ok',text:'通過',w:100,n};if(l.judgment==='NG')return {cls:'ng',text:'NG',w:100,n};return {cls:'pending',text:'待確認',w:50,n};}
+function sampleCounts(parts,key){const c={ok:0,ng:0,pending:0,none:0};parts.forEach(p=>{c[sampleState(p,key).cls]++;});return c;}
+function partVisible(cc,lc,name,q,f,plan){q=String(q||'').trim().toLowerCase();if(q&&!String(name).toLowerCase().includes(q))return false;if(f==='ng')return cc==='ng'||lc==='ng';if(f==='pending')return cc==='pending'||lc==='pending';if(f==='none')return cc==='none'||lc==='none';if(f==='open')return !(cc==='ok'&&lc==='ok');return true;}
+function applyPartFilter(){let shown=0;document.querySelectorAll('.part-item,.ov-row').forEach(el=>{const g=el.closest('.plan-group'),folded=g&&g.classList.contains('collapsed'),match=el.classList.contains('active')||partVisible(el.dataset.c,el.dataset.l,el.dataset.name,state.partQuery,state.partFilter,el.dataset.plan);el.hidden=!(match&&(!folded||el.classList.contains('active')));if(match)shown++;});document.querySelectorAll('.plan-group').forEach(g=>{g.hidden=!g.querySelector('.part-item[data-name]:not([hidden]),.part-item.active')&&![...g.querySelectorAll('.part-item')].some(el=>el.classList.contains('active')||partVisible(el.dataset.c,el.dataset.l,el.dataset.name,state.partQuery,state.partFilter,el.dataset.plan));});const n=document.getElementById('partShown');if(n)n.textContent=shown;}
+function setPartQuery(v){state.partQuery=v;applyPartFilter();}
+function setPartFilter(v){state.partFilter=v;applyPartFilter();}
+function selectPart(id){state.partId=id;state.partView='list';renderDetail();}
+function stepPart(dir){const p=db.projects.find(x=>x.id===state.projectId),parts=(p?scopeSort(p,planSortedP(p).filter(c=>inPlan(c,state.partPlan))):[]),i=parts.findIndex(c=>c.id===state.partId),n=parts[i+dir];if(n)selectPart(n.id);}
+function jumpPart(id,key){state.partId=id;state.partView='list';renderDetail();requestAnimationFrame(()=>{const el=document.getElementById('lane-'+id+'-'+key);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1700);}});}
+function dayDiff(d){return Math.round((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5);}
+function dueInfo(date,cls){if(cls==='ok')return {t:'done',text:'已完成',days:99999};if(!date)return {t:'none',text:'未設截止日',days:90000};const d=dayDiff(date);if(d<0)return {t:'over',text:`逾期 ${-d} 天`,days:d};if(d===0)return {t:'red',text:'今天截止',days:0};return {t:d<=7?'red':d<=14?'warn':'far',text:`剩 ${d} 天`,days:d};}
+function dueBadge(date,cls){const i=dueInfo(date,cls);return `<span class="due-badge ${i.t}" title="${date?`截止 ${dateText(date)}`:'請在「編輯時程」設定日期'}">${i.text}</span>`;}
+function partDue(p,key){return (p.dates||{})[key==='centerSamples'?'ER':'PR']||'';}
+function prepInfo(c){if(c.prepDone)return {t:'done',text:'已備料',days:99999};if(!c.prepDate)return {t:'none',text:'未設定',days:90000};const i=dueInfo(c.prepDate,'');return {...i,text:i.text==='今天截止'?'今天備料':i.text};}
+function prepBadge(c){const i=prepInfo(c);return `<span class="due-badge ${i.t}" title="${c.prepDate?`備料 ${dateText(c.prepDate)}`:'尚未設定備料時間'}">${i.text}</span>`;}
+function setPartView(v){state.partView=v;renderDetail();}
+function setPartSort(v){state.partSort=v;renderDetail();}
+function renderPartOverview(p,parts){
+ const rows=parts.map((c,i)=>{const a=sampleState(c,'centerSamples'),b=sampleState(c,'limitSamples'),dc=dueInfo(partDue(p,'centerSamples'),a.cls),dl=dueInfo(partDue(p,'limitSamples'),b.cls),dp=prepInfo(c);return {c,a,b,dc,dl,dp,urg:Math.min(dc.days,dl.days,dp.days),i};});
+ if(state.partSort!=='order')rows.sort((x,y)=>x.urg-y.urg||x.i-y.i);
+ const items=rows.flatMap(r=>[r.dc,r.dl,r.dp]),nOver=items.filter(x=>x.t==='over').length,nSoon=items.filter(x=>x.t==='red').length,nWarn=items.filter(x=>x.t==='warn').length;
+ const vis=r=>partVisible(r.a.cls,r.b.cls,partLabel(r.c),state.partQuery,state.partFilter,r.c.plan||''),shown=rows.filter(vis).length;
+ const opts=[['all','全部部件'],['open','尚未全部通過'],['ng','有 NG'],['pending','待確認'],['none','尚未開始']].map(([v,l])=>`<option value="${v}" ${state.partFilter===v?'selected':''}>${l}</option>`).join('');
+ const hdr=(label,key,short)=>{const d=partDue(p,key);return `<th>${label}<small>${d?`${short} 前 · 截止 ${dateText(d)}`:`尚未設定 ${short} 日期`}</small></th>`;};
+ const cell=(r,key,st)=>`<td class="ov-cell"><button type="button" class="ov-btn" onclick="jumpPart('${r.c.id}','${key}')" title="前往「${esc(partLabel(r.c))}」的紀錄"><span class="ov-st ${st.cls}">${st.text}</span><span class="ov-sub">${st.n?`第 ${st.n} 次打樣 · 最近 ${dateText(sampleLatest(r.c,key).date)}`:'尚無紀錄'}</span>${dueBadge(partDue(p,key),st.cls)}</button></td>`;
+ return `<div class="ov"><div class="ov-bar"><div class="ov-tools"><input type="search" placeholder="搜尋部件" value="${esc(state.partQuery)}" oninput="setPartQuery(this.value)" aria-label="搜尋部件"><select onchange="setPartFilter(this.value)" aria-label="篩選部件">${opts}</select><select onchange="setPartSort(this.value)" aria-label="排序"><option value="due" ${state.partSort!=='order'?'selected':''}>最急優先</option><option value="order" ${state.partSort==='order'?'selected':''}>建立順序</option></select></div><div class="ov-chips"><span class="over">逾期 ${nOver}</span><span class="red">7 天內 ${nSoon}</span><span class="warn">14 天內 ${nWarn}</span></div></div><div class="ov-wrap"><table class="ov-table"><thead><tr><th>部件</th><th>備料<small>各部件自訂（選填）</small></th>${hdr('中心色','centerSamples','ER')}${hdr('限度樣','limitSamples','PR')}</tr></thead><tbody>${rows.map(r=>`<tr class="ov-row" ${vis(r)?'':'hidden'} data-name="${esc(partLabel(r.c))}" data-plan="${esc(r.c.plan||'')}" data-c="${r.a.cls}" data-l="${r.b.cls}"><td class="ov-name"><button type="button" onclick="selectPart('${r.c.id}')" title="開啟此部件"><b>${esc(r.c.name)}</b><small>${isShared(r.c)?'<span class="share-chip">共用</span>':(state.partPlan==='all'&&r.c.plan?`<span class="plan-tag">${esc(r.c.plan)}</span>`:'')}${esc(r.c.material||'未設定材質')}</small></button></td><td class="ov-cell"><button type="button" class="ov-btn" onclick="openComponentDialog('${r.c.id}')" title="${r.c.prepDate||r.c.prepDone?'修改備料時間':'設定備料時間'}">${r.c.prepDate||r.c.prepDone?`<span class="ov-prep-date">${r.c.prepDate?dateText(r.c.prepDate):'—'}</span>${prepBadge(r.c)}`:'<span class="ov-sub">＋ 設定</span>'}</button></td>${cell(r,'centerSamples',r.a)}${cell(r,'limitSamples',r.b)}</tr>`).join('')}</tbody></table></div><div class="part-nav-foot">顯示 <b id="partShown">${shown}</b> / ${parts.length} 個部件 · 截止日依機種的 ER／PR 日期自動計算，如需調整請到「編輯時程」</div></div>`;}
+function renderSampling(p){const all=planSortedP(p),groups=planOrder(p),showTabs=groups.some(Boolean),keys=groups.map(g=>g||PLAN_NONE);
+ if(!showTabs)state.partPlan='all';else if(!(state.partPlan==='all'&&groups.length>1)&&!keys.includes(state.partPlan)){const ap=all.find(c=>c.id===state.partId);state.partPlan=ap?(ap.plan||PLAN_NONE):keys[0];}
+ const parts=scopeSort(p,all.filter(c=>inPlan(c,state.partPlan))),pct=key=>parts.length?Math.round(parts.filter(c=>sampleState(c,key).cls==='ok').length/parts.length*100):0,center=pct('centerSamples'),limit=pct('limitSamples'),active=parts.find(c=>c.id===state.partId)||parts[0];if(active)state.partId=active.id;const multi=state.partPlan==='all';if(state.partQuery===undefined)state.partQuery='';if(!state.partFilter)state.partFilter='all';
+ const card=(label,pct,key)=>{const cnt=sampleCounts(parts,key),att=parts.map(c=>({c,st:sampleState(c,key)})).filter(x=>x.st.cls==='ng'||x.st.cls==='pending').sort((a,b)=>(a.st.cls==='ng'?0:1)-(b.st.cls==='ng'?0:1)),top=att.slice(0,4);
+  return `<div class="sampling-progress-card"><div class="sampling-progress-head"><span>${label}</span><b>${pct}%</b></div><div class="progress"><span style="width:${pct}%"></span></div><div class="sampling-progress-note">${cnt.ok} / ${parts.length} 個部件通過</div>${parts.length?`<div class="sp-due">${partDue(p,key)?`<span>截止 ${dateText(partDue(p,key))}（${key==='centerSamples'?'ER':'PR'} 前）</span>${cnt.ok===parts.length?'<span class="due-badge done">已完成</span>':dueBadge(partDue(p,key),'x')}`:`<span>尚未設定 ${key==='centerSamples'?'ER':'PR'} 日期</span>`}</div>`+`<div class="sp-counts"><span class="ok">通過 ${cnt.ok}</span><span class="ng">NG ${cnt.ng}</span><span class="pending">待確認 ${cnt.pending}</span><span class="none">未開始 ${cnt.none}</span></div><div class="part-mini-list">${parts.map(c=>({c,st:sampleState(c,key)})).sort((x,y)=>({ng:0,pending:1,none:2,ok:3}[x.st.cls])-({ng:0,pending:1,none:2,ok:3}[y.st.cls])).map(({c,st})=>`<button type="button" class="part-mini ${st.cls}" onclick="jumpPart('${c.id}','${key}')" title="前往「${esc(partLabel(c))}」的${label}"><span class="pm-name"><span class="pm-nt">${esc(multi?partLabel(c):c.name)}</span>${(()=>{const pi=prepInfo(c);return ['over','red','warn','far'].includes(pi.t)?`<small class="pm-prep ${pi.t}">備料${pi.text}</small>`:'';})()}</span><span class="pm-n">${st.n?`第 ${st.n} 次`:'—'}</span><span class="pm-bar"><i style="width:${st.w}%"></i></span><span class="pm-state">${st.text}</span></button>`).join('')}</div>`:''}</div>`;};
+ const idx=active?parts.indexOf(active):-1,vis=parts.filter(c=>c.id===state.partId||partVisible(sampleState(c,'centerSamples').cls,sampleState(c,'limitSamples').cls,partLabel(c),state.partQuery,state.partFilter,c.plan||'')).length;
+ const opts=[['all','全部部件'],['open','尚未全部通過'],['ng','有 NG'],['pending','待確認'],['none','尚未開始']].map(([v,l])=>`<option value="${v}" ${state.partFilter===v?'selected':''}>${l}</option>`).join('');
+ const navItems=parts.map(c=>{const a=sampleState(c,'centerSamples'),b=sampleState(c,'limitSamples'),match=c.id===state.partId||partVisible(a.cls,b.cls,partLabel(c),state.partQuery,state.partFilter,c.plan||'');return `<button type="button" class="part-item ${c.id===state.partId?'active':''}" ${match?'':'hidden'} data-name="${esc(partLabel(c))}" data-plan="${esc(c.plan||'')}" data-c="${a.cls}" data-l="${b.cls}" onclick="selectPart('${c.id}')"><span class="pi-name">${esc(c.name)}</span><span class="pi-sub">${isShared(c)?'<span class="share-chip" title="所有 Color Plan 共用同一份">共用</span>':''}${multi&&c.plan&&!isShared(c)?`<span class="plan-tag">${esc(c.plan)}</span>`:''}${esc(c.material||'未設定材質')}${(()=>{const pi=prepInfo(c);return ['over','red','warn'].includes(pi.t)?` · <span class="pi-prep ${pi.t}">備料${pi.text}</span>`:'';})()}</span><span class="pt-chips"><span class="pt-chip ${a.cls}" title="中心色：${a.n?`第 ${a.n} 次，`:''}${a.text}">中</span><span class="pt-chip ${b.cls}" title="限度樣：${b.n?`第 ${b.n} 次，`:''}${b.text}">限</span></span></button>`;}).join('');
+ const nav=`<div class="part-nav" role="navigation" aria-label="部件清單"><div class="part-nav-tools"><input type="search" placeholder="搜尋部件" value="${esc(state.partQuery)}" oninput="setPartQuery(this.value)" aria-label="搜尋部件"><select onchange="setPartFilter(this.value)" aria-label="篩選部件">${opts}</select></div><div class="part-nav-list">${navItems}</div><div class="part-nav-foot">顯示 <b id="partShown">${vis}</b> / ${parts.length} 個部件</div></div>`;
+ const tabCount=cs=>({ok:cs.filter(c=>sampleState(c,'centerSamples').cls==='ok'&&sampleState(c,'limitSamples').cls==='ok').length,n:cs.length,ng:cs.some(c=>sampleState(c,'centerSamples').cls==='ng'||sampleState(c,'limitSamples').cls==='ng')});
+ const tab=(key,label,cs)=>{const t=tabCount(cs);return `<button type="button" role="tab" aria-selected="${state.partPlan===key}" class="plan-tab ${state.partPlan===key?'active':''}" onclick="selectPlanTab(${jsAttr(key)})"><span class="pl-name">${esc(label)}</span>${t.ng?'<i class="pl-flag" title="有 NG"></i>':''}<span class="pl-count" title="中心色與限度樣都通過的部件數">${t.ok}/${t.n}</span></button>`;};
+ const curPlan=(state.partPlan==='all'||state.partPlan===PLAN_NONE)?null:state.partPlan;
+ const tabs=showTabs?`<div class="plan-tabs"><div class="plan-tab-list" role="tablist" aria-label="Color Plan">${groups.length>1?tab('all','全部',all):''}${groups.map(g=>tab(g||PLAN_NONE,g||'未分類',all.filter(c=>inPlan(c,g||PLAN_NONE)))).join('')}</div></div>`:'';
+ const main=active?`<div class="part-main"><div class="part-step"><div class="ps-prep"><span class="ps-label">備料</span>${active.prepDate||active.prepDone?`${active.prepDate?`<b>${dateText(active.prepDate)}</b>`:''}${prepBadge(active)}`:'<span class="ps-none">未設定</span>'}</div><div class="ps-nav"><span>${idx+1} / ${parts.length}</span><button type="button" onclick="stepPart(-1)" ${idx<=0?'disabled':''}>${ICON.chevL}上一個</button><button type="button" onclick="stepPart(1)" ${idx>=parts.length-1?'disabled':''}>下一個${ICON.chevR}</button></div></div><div class="parts-grid">${renderSamplingLane(p,active,'centerSamples','中心色')+renderSamplingLane(p,active,'limitSamples','限度樣')}</div></div>`:'';
+ const emptyPlan=Boolean(showTabs&&!parts.length&&curPlan);
+ const sw=parts.length?`<div class="ov-switch" role="tablist"><button type="button" role="tab" class="${state.partView==='table'?'':'active'}" onclick="setPartView('list')">部件清單</button><button type="button" role="tab" class="${state.partView==='table'?'active':''}" onclick="setPartView('table')">總表</button></div>`:'';
+ return `<section class="card sampling"><div class="sampling-head"><h2>部件打樣</h2>${renderPrepInline(p)}<div class="sampling-actions"><button class="btn soft" onclick="openPlanBoard()">${ICON.edit}Color Plan 管理</button></div></div>${tabs}${emptyPlan?renderEmptyPlan(p,curPlan):`<div class="sampling-progress-summary">${card('中心色完成率',center,'centerSamples')}${card('限度樣完成率',limit,'limitSamples')}</div>${parts.length?`${sw}${state.partView==='table'?renderPartOverview(p,parts):`<div class="parts-layout">${nav}${main}</div>`}`:'<div class="plan-empty"><h3>還沒有任何部件</h3><p>請先開啟 Color Plan 管理，新增顏色並建立部件。</p><div class="plan-empty-actions"><button type="button" class="btn primary" onclick="openPlanBoard()">'+ICON.edit+'開啟 Color Plan 管理</button></div></div>'}`}</section>`;}
 function setSampleStatus(button,value){const form=button.closest('form');form.elements.judgment.value=value;form.querySelectorAll('.sample-status-btn').forEach(b=>{const selected=b.textContent.trim()===value;b.classList.toggle('selected',selected);b.classList.toggle('ok',selected&&value==='OK');b.classList.toggle('ng',selected&&value==='NG');b.setAttribute('aria-pressed',String(selected));});}
-function addComponent(){componentForm.reset();componentDialog.showModal();}
-componentForm.onsubmit=e=>{e.preventDefault();const p=db.projects.find(x=>x.id===state.projectId),data=Object.fromEntries(new FormData(e.target)),name=data.name.trim();if(!p||!name)return;p.components ||= [];if(p.components.some(c=>c.name.trim().toLowerCase()===name.toLowerCase())){alert('這個部件已存在');return;}p.components.push({id:uid(),name,material:data.material.trim(),centerSamples:[],limitSamples:[]});componentDialog.close();save('部件已新增');};
-function removeComponent(projectId,componentId){const p=db.projects.find(x=>x.id===projectId),c=p?.components?.find(x=>x.id===componentId);if(!c)return;if(confirm(`確定移除「${c.name}」及其打樣紀錄？`)){p.components=p.components.filter(x=>x.id!==componentId);save('部件已移除')}}
+function openComponentDialog(id){const p=curProject(),c=id&&p?(p.components||[]).find(x=>x.id===id):null;if(!c)return;const f=componentForm.elements;componentForm.reset();f.namedItem('id').value=c.id;f.namedItem('name').value=c.name;f.namedItem('material').value=c.material||'';f.namedItem('prepDate').value=c.prepDate||'';f.namedItem('prepDone').checked=Boolean(c.prepDone);componentDialog.showModal();}
+function addComponent(){openComponentDialog('');}
+componentForm.onsubmit=e=>{e.preventDefault();const p=curProject(),data=Object.fromEntries(new FormData(e.target)),name=data.name.trim(),c=p&&p.components.find(x=>x.id===data.id);if(!c||!name)return;if(name!==c.name&&!renamePartEverywhere(p,c,name))return;c.material=data.material.trim();c.prepDate=data.prepDate||'';c.prepDone=Boolean(data.prepDone);state.partId=c.id;componentDialog.close();save('部件已更新');};
+function removeComponent(projectId,componentId){const p=db.projects.find(x=>x.id===projectId),c=p?.components?.find(x=>x.id===componentId);if(!c)return;if(confirm(`確定移除「${partLabel(c)}」及其打樣紀錄？${isShared(c)?'\n（這是共用部件，會從所有顏色一起移除）':''}`)){p.components=p.components.filter(x=>x.id!==componentId);save('部件已移除')}}
 function removeSample(projectId,componentId,sampleId,key){const p=db.projects.find(x=>x.id===projectId),c=p?.components?.find(x=>x.id===componentId),samples=c?.[key],s=samples?.find(x=>x.id===sampleId);if(!s)return;if(confirm(`確定刪除 ${dateText(s.date)} 的這筆打樣紀錄？`)){c[key]=samples.filter(x=>x.id!==sampleId);save('打樣紀錄已刪除')}}
 function compressPhoto(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const scale=Math.min(1,1000/Math.max(img.width,img.height)),canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);URL.revokeObjectURL(url);resolve(canvas.toDataURL('image/jpeg',.7));};img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('照片讀取失敗'));};img.src=url;});}
 async function addSampleFromForm(event,projectId,componentId,key){event.preventDefault();const form=event.currentTarget,p=db.projects.find(x=>x.id===projectId),c=p?.components?.find(x=>x.id===componentId);if(!c||!['centerSamples','limitSamples'].includes(key))return;const data=new FormData(form),judgment=data.get('judgment'),files=[...form.elements.photos.files];if(!judgment){alert('請先選擇 OK 或 NG');return;}if(files.length>4){alert('每筆打樣紀錄最多附加 4 張照片');return;}try{const photos=await Promise.all(files.map(compressPhoto));c[key]||=[];const sample={id:uid(),date:data.get('date'),judgment,comment:data.get('comment').trim(),photos};c[key].push(sample);try{save('打樣紀錄已新增')}catch(err){c[key].pop();alert('儲存空間不足，照片未能儲存。請減少照片數量或改用較小的照片。');} }catch(err){alert('照片讀取失敗，請重新選擇照片。');}}
@@ -917,7 +1317,7 @@ function npiRowsForProject(p){
 }
 function designChangeStatusInfo(status){return status==='完成'?['done','完成']:status==='緊急'?['urgent','緊急']:['active','進行'];}
 function designChangeContents(r){if(!Array.isArray(r.contentItems)||(!r.contentItems.length&&r.content))r.contentItems=r.content?[{id:uid(),text:String(r.content),checked:false}]:[];r.contentItems=r.contentItems.map(item=>typeof item==='string'?{id:uid(),text:item,checked:false}:(item||{id:uid(),text:'',checked:false}));r.contentItems.forEach(item=>{if(!item.id)item.id=uid();if(typeof item.checked!=='boolean')item.checked=false;});return r.contentItems;}
-function renderDesignChange(p){const rows=[...(p.designChanges||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||'')),legacy=p.overallDimensions||{},keys=DIM_KEYS,labels={inch:'吋別',x:'X',y:'Y',z:'Z',lcdZ:'LCD',sysZ:'SYS',footZF:'Foot Z 前',footZR:'Foot Z 後',fanZ:'FanZ',cpuThermal:'CPU thermal',weight:'weight'},dimensionRows=[];if(keys.some(k=>legacy[k]))dimensionRows.push({date:'',task:'整機基準',...legacy});rows.filter(r=>designChangeHasSpecs(r)&&keys.some(k=>r[k])).forEach(r=>dimensionRows.push({id:r.id,date:r.date,task:(r.specItem!==undefined?r.specItem:r.task)||'設計變更',...Object.fromEntries(keys.map(k=>[k,r[k]||'']))}));return `<section class="card change-tracker"><div class="change-tracker-head"><h2>設計歷程</h2><button class="btn primary" onclick="openDesignChangeDialog()">${ICON.plus}新增設計變更</button></div><section class="overall-dimensions"><div class="overall-dimensions-title">整機尺寸</div>${dimensionRows.length?`<div class="overall-dimensions-wrap"><table class="overall-dimensions-table"><thead><tr><th rowspan="2">時間</th><th rowspan="2">項目</th>${keys.map(k=>k==='footZF'?'<th colspan="2" class="dim-group">Foot Z</th>':k==='footZR'?'':`<th rowspan="2">${labels[k]}</th>`).join('')}<th rowspan="2" class="dim-op">操作</th></tr><tr><th class="dim-sub">前</th><th class="dim-sub">後</th></tr></thead><tbody>${dimensionRows.map(r=>`<tr><td>${r.date?dateTextYear(r.date):'—'}</td><td>${esc(r.task)}</td>${keys.map(k=>`<td>${esc(r[k]||'—')}</td>`).join('')}<td class="dim-op"><button type="button" class="change-edit" onclick="${r.id?`editDesignChange('${p.id}','${r.id}')`:`editOverallDimensions('${p.id}')`}">修改</button></td></tr>`).join('')}</tbody></table></div>`:`<div class="overall-dimensions-empty">新增含尺寸的設計變更後，尺寸會累積顯示於此。</div>`}</section><div class="change-add-note">每筆設計變更可記錄狀態、內部／上階／BU 確認、Due Date 與進度。</div>${rows.length?`<div class="change-table-wrap"><table class="change-table"><colgroup><col style="width:5%"><col style="width:6%"><col style="width:8%"><col style="width:11%"><col style="width:4%"><col style="width:4%"><col style="width:6%"><col style="width:30%"><col style="width:22%"><col style="width:4%"></colgroup><thead><tr><th>時間</th><th>狀態</th><th>Tasks</th><th>Due date</th><th>內部</th><th>上階</th><th>BU</th><th>細項</th><th>進度</th><th>操作</th></tr></thead><tbody>${rows.map(r=>renderDesignChangeRow(p,r)).join('')}</tbody></table></div>`:`<div class="change-empty">尚無設計歷程，按「新增設計變更」建立第一筆。</div>`}</section>`;}
+function renderDesignChange(p){const rows=[...(p.designChanges||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||'')),legacy=p.overallDimensions||{},keys=DIM_KEYS,labels={inch:'吋別',x:'X',y:'Y',z:'Z',lcdZ:'LCD',sysZ:'SYS',footZF:'Foot Z 前',footZR:'Foot Z 後',fanZ:'FanZ',cpuThermal:'CPU thermal',weight:'weight'},dimensionRows=[];if(keys.some(k=>legacy[k]))dimensionRows.push({rid:'base',sync:Boolean(p.overallSync),date:'',task:'整機基準',...legacy});rows.filter(r=>designChangeHasSpecs(r)&&keys.some(k=>r[k])).forEach(r=>dimensionRows.push({id:r.id,rid:r.id,sync:Boolean(r.sizeSync),date:r.date,task:(r.specItem!==undefined?r.specItem:r.task)||'設計變更',...Object.fromEntries(keys.map(k=>[k,r[k]||'']))}));return `<section class="card change-tracker"><div class="change-tracker-head"><h2>設計歷程</h2><button class="btn primary" onclick="openDesignChangeDialog()">${ICON.plus}新增設計變更</button></div><section class="overall-dimensions"><div class="overall-dimensions-title">整機尺寸<small class="dim-hint">打勾的尺寸才會同步到「機種尺寸總覽」；同一機種有多個 SKU 尺寸時，可以同時勾選多筆。</small></div>${dimensionRows.length?`<div class="overall-dimensions-wrap"><table class="overall-dimensions-table"><thead><tr><th rowspan="2">時間</th><th rowspan="2">項目</th>${keys.map(k=>k==='footZF'?'<th colspan="2" class="dim-group">Foot Z</th>':k==='footZR'?'':`<th rowspan="2">${labels[k]}</th>`).join('')}<th rowspan="2" class="dim-sync" title="打勾後，這筆尺寸會同步到「機種尺寸總覽」">同步</th><th rowspan="2" class="dim-op">操作</th></tr><tr><th class="dim-sub">前</th><th class="dim-sub">後</th></tr></thead><tbody>${dimensionRows.map(r=>`<tr><td>${r.date?dateTextYear(r.date):'—'}</td><td>${esc(r.task)}</td>${keys.map(k=>`<td>${esc(r[k]||'—')}</td>`).join('')}<td class="dim-sync"><input type="checkbox" ${r.sync?'checked':''} onchange="toggleSizeSync('${p.id}','${r.rid}',this.checked)" aria-label="同步到機種尺寸總覽" title="同步到機種尺寸總覽"></td><td class="dim-op"><button type="button" class="change-edit" onclick="${r.id?`editDesignChange('${p.id}','${r.id}')`:`editOverallDimensions('${p.id}')`}">修改</button></td></tr>`).join('')}</tbody></table></div>`:`<div class="overall-dimensions-empty">新增含尺寸的設計變更後，尺寸會累積顯示於此。</div>`}</section><div class="change-add-note">每筆設計變更可記錄狀態、內部／上階／BU 確認、Due Date 與進度。</div>${rows.length?`<div class="change-table-wrap"><table class="change-table"><colgroup><col style="width:5%"><col style="width:6%"><col style="width:8%"><col style="width:11%"><col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:29%"><col style="width:22%"><col style="width:4%"></colgroup><thead><tr><th>時間</th><th>狀態</th><th>Tasks</th><th>Due date</th><th>內部</th><th>上階</th><th>BU</th><th>細項</th><th>進度</th><th>操作</th></tr></thead><tbody>${rows.map(r=>renderDesignChangeRow(p,r)).join('')}</tbody></table></div>`:`<div class="change-empty">尚無設計歷程，按「新增設計變更」建立第一筆。</div>`}</section>`;}
 function designChangeHasSpecs(r){return typeof r.includeSpecs==='boolean'?r.includeSpecs:Boolean(r.task||DIM_KEYS.some(k=>r[k]));}
 
 function designChangeApprovalValue(item,key,r){const value=typeof item[key]==='boolean'?(item[key]?(key==='upper'?'J':'OK'):''):item[key];if(value!==undefined&&value!==null)return value;const legacy=r[key];return typeof legacy==='boolean'?(legacy?(key==='upper'?'J':'OK'):''):(legacy||'');}
@@ -950,8 +1350,7 @@ function renderDetail(){
  const filtered=t=>{const q=state.query.toLowerCase(),match=!q||(t.item+t.category+t.standard).toLowerCase().includes(q),status=state.filter==='all'||(state.filter==='done'&&t.done)||(state.filter==='open'&&!t.done)||(state.filter==='issue'&&(isNpi?t.hasIssue:t.issue));return match&&status;};
  const columns=isModel?`<div class="model-columns">${['3D','草模','精模'].map(k=>`<div class="model-stage-head"><b>${k}</b><small>${modelColumnProgress(p,k)}%</small></div>`).join('')}<span>檢查項目</span><span>確認標準</span><span>Issue / Observation</span></div>`:isNpi?`<div class="npi-columns">${NPI_STAGES.map(s=>`<div class="npi-stage-head"><b>${s}</b><small>${projectProgress(p,s)}%</small></div>`).join('')}<span>檢查項目</span><span>確認標準</span><span>Issue / Observation</span></div>`:'<div class="stage-columns"><span>確認狀態</span><span>檢查項目</span><span>確認標準</span><span>Issue / Observation</span></div>';
  const rowsHtml=groups.map(g=>{const rows=tasks.filter(t=>t.group===g&&filtered(t));if(!rows.length)return '';const countRows=isNpi?rows.filter(t=>t.applicable):rows;return `<div class="group-head">${esc(g)} · ${countRows.filter(t=>t.done).length}/${countRows.length}</div>${rows.map(t=>isModel?modelTaskRow(t):isNpi?npiTaskRow(t):taskRow(t)).join('')}`}).join('');
- document.getElementById('detail').innerHTML=`<div class="topbar"><div class="detail-head"><button class="back" onclick="switchView(state.view)" aria-label="返回">${ICON.back}</button><div class="detail-title"><h1>${esc(p.name)}</h1><div class="sub">${esc(p.designer)} · ${esc(p.note||'NPI 外觀設計檢查')}</div></div></div><div class="toolbar"><button class="btn" onclick="editDates('${p.id}')">編輯時程</button></div></div>
- <div class="notice">3D/模型確認後進入中心限度打樣；ER 前完成中心樣、PR 前完成限度樣。後續 NPI 依 SR／ER／PR／MP 階段確認。</div>
+ document.getElementById('detail').innerHTML=`<div class="topbar"><div class="detail-head"><button class="back" onclick="switchView(state.view)" aria-label="返回">${ICON.back}</button><div class="detail-title"><h1>${esc(p.name)}</h1><div class="sub">${esc(p.designer)} · ${esc(p.note||'NPI 外觀設計檢查')}</div></div></div><div class="notice head-notice">3D/模型確認後進入中心限度打樣；ER 前完成中心樣、PR 前完成限度樣。後續 NPI 依 SR／ER／PR／MP 階段確認。</div><div class="toolbar"><button class="btn" onclick="editDates('${p.id}')">編輯時程</button></div></div>
  <div class="stage-tabs">${DETAIL_TABS.map(s=>`<button class="stage-tab ${s===state.stage?'active':''}" onclick="setDetailStage('${s}')">${DETAIL_TAB_LABELS[s]||s}<small>${s==='設變歷程'?`${(p.designChanges||[]).length} 筆`:s==='打樣'?`${samplingProgress(p)}%`:`${projectProgress(p,s)}%`}</small></button>`).join('')}</div>
  ${isDesignChange?renderDesignChange(p):isSampling?renderSampling(p):`${isModel?`<div class="notice">${esc(NB3D_GUIDANCE)}</div>`:''}<div class="filters"><input class="search" placeholder="搜尋檢查項目或標準" value="${esc(state.query)}" oninput="state.query=this.value;renderDetail()"><select onchange="state.filter=this.value;renderDetail()"><option value="all" ${state.filter==='all'?'selected':''}>全部狀態</option><option value="open" ${state.filter==='open'?'selected':''}>未完成</option><option value="done" ${state.filter==='done'?'selected':''}>已完成</option><option value="issue" ${state.filter==='issue'?'selected':''}>有 Issue</option></select></div><div class="card checklist ${isModel?'model-checklist':isNpi?'npi-checklist':'stage-checklist'}">${columns}${rowsHtml||'<div class="empty"><h3>沒有符合條件的項目</h3></div>'}</div>`}`;
 }
@@ -995,7 +1394,9 @@ scheduleForm.onsubmit=e=>{ e.preventDefault(); const data=Object.fromEntries(new
 const cfgState={sync:true,pinMsg:'',tab:'3d'};
 const cloneJson=v=>JSON.parse(JSON.stringify(v));
 function ensureCompetitors(){if(!Array.isArray(db.competitors))db.competitors=[];}
-function ensureNpiTemplate(){if(db.adminPin)delete db.adminPin;if(!Array.isArray(db.npiTemplate)||!db.npiTemplate.length)db.npiTemplate=JSON.parse(JSON.stringify(CHECKLIST));if(!Array.isArray(db.threeDTemplate)||!db.threeDTemplate.length)db.threeDTemplate=JSON.parse(JSON.stringify(THREED_CHECKLIST));}
+function ensureNpiTemplate(){if(db.adminPin)delete db.adminPin;if(!Array.isArray(db.npiTemplate)||!db.npiTemplate.length)db.npiTemplate=JSON.parse(JSON.stringify(CHECKLIST));if(!Array.isArray(db.threeDTemplate)||!db.threeDTemplate.length)db.threeDTemplate=JSON.parse(JSON.stringify(THREED_CHECKLIST));if(!Array.isArray(db.partTemplate)||!db.partTemplate.length)db.partTemplate=DEFAULT_PARTS();}
+function DEFAULT_PARTS(){return ['陽極','B件','鍵盤','FP','Foot','螺絲'].map((n,i)=>({name:n,material:'',perPlan:i===0}));}
+function partTemplate(){ensureNpiTemplate();return db.partTemplate;}
 function npiTemplate(){ensureNpiTemplate();return db.npiTemplate;}
 function threeDTemplate(){ensureNpiTemplate();return db.threeDTemplate;}
 ensureNpiTemplate();
@@ -1023,12 +1424,19 @@ function cfgMoveGroup(group,dir){const tpl=cfgTpl(),order=[...new Set(tpl.map(c=
 function cfgRenameGroup(group){const name=(prompt('群組名稱',group)||'').trim();if(!name||name===group)return;cfgTpl().forEach(c=>{if(c.group===group)c.group=name;});if(cfgState.sync)db.projects.forEach(p=>p.tasks.forEach(t=>{if(cfgInScope(t)&&t.group===group)t.group=name;}));cfgCommit('群組已重新命名');}
 function cfgReset(){const label=cfgIs3D()?'3D/模型':'NPI';if(!confirm(`把 ${label} 範本還原成原始預設內容？\n\n只還原範本，既有機種的檢查列不會被更動。`))return;cfgSetTpl(cloneJson(cfgIs3D()?THREED_CHECKLIST:CHECKLIST));save('範本已還原為預設');}
 const jsAttr=v=>JSON.stringify(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-function renderConfig(){const el=document.getElementById('config');if(!el)return;
+function cfgTabsHtml(){const t=cfgState.tab;return `<div class="stage-tabs cfg-tabs"><button class="stage-tab ${t==='3d'?'active':''}" onclick="cfgSwitchTab('3d')">3D/模型 Check<small>${threeDTemplate().length} 項</small></button><button class="stage-tab ${t==='npi'?'active':''}" onclick="cfgSwitchTab('npi')">NPI Check<small>${npiTemplate().length} 項</small></button><button class="stage-tab ${t==='parts'?'active':''}" onclick="cfgSwitchTab('parts')">打樣部件範本<small>${partTemplate().length} 項</small></button></div>`;}
+function cfgPartSet(i,k,v){const t=partTemplate()[i];if(!t)return;t[k]=k==='perPlan'?Boolean(v):String(v).trim();persist();}
+function cfgPartAdd(){partTemplate().push({name:'新部件',material:'',perPlan:false});save('已新增，請修改名稱');}
+function cfgPartDel(i){const t=partTemplate()[i];if(!t||!confirm(`從範本刪除「${t.name}」？\n不影響已建立的部件。`))return;partTemplate().splice(i,1);save('已從範本刪除');}
+function cfgPartMove(i,d){const a=partTemplate(),j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save('順序已調整');}
+function cfgPartReset(){if(!confirm('把「打樣部件範本」還原成預設？'))return;db.partTemplate=DEFAULT_PARTS();save('已還原為預設');}
+function renderPartTemplateTab(){const t=partTemplate();return `<div class="topbar"><div><h1>管理者模式</h1><div class="sub">新增第一個 Color Plan 時，會以這份範本列出部件。沒有勾選「隨顏色改變」的部件（例如 B件、鍵盤）預設為共用，所有顏色共用同一份；勾選的（例如陽極）每個顏色各自一份。修改範本不會影響已建立的部件。</div></div><div class="toolbar"><button class="btn" onclick="cfgPartReset()">還原預設</button><button class="btn primary" onclick="cfgPartAdd()">${ICON.plus}新增部件</button></div></div>${cfgTabsHtml()}<div class="card cfg-list part-tpl">${t.map((x,i)=>`<div class="tpl-row"><input value="${esc(x.name)}" onchange="cfgPartSet(${i},'name',this.value)" aria-label="部件名稱"><input value="${esc(x.material||'')}" placeholder="預設材質（選填）" onchange="cfgPartSet(${i},'material',this.value)" aria-label="預設材質"><label class="tpl-check"><input type="checkbox" ${x.perPlan?'checked':''} onchange="cfgPartSet(${i},'perPlan',this.checked)">隨顏色改變</label><div class="cfg-actions"><button class="cfg-ic" title="上移" ${i===0?'disabled':''} onclick="cfgPartMove(${i},-1)">${ICON.up}</button><button class="cfg-ic" title="下移" ${i===t.length-1?'disabled':''} onclick="cfgPartMove(${i},1)">${ICON.down}</button><button class="cfg-ic danger" title="刪除" onclick="cfgPartDel(${i})">${ICON.trash}</button></div></div>`).join('')}</div>`;}
+function renderConfig(){const el=document.getElementById('config');if(!el)return;if(cfgState.tab==='parts'){el.innerHTML=renderPartTemplateTab();return;}
 
  const is3=cfgIs3D(),tpl=cfgTpl(),groups=[...new Set(tpl.map(c=>c.group))],total=tpl.length,label=is3?'3D/模型':'NPI';
  const rows=groups.map((g,gi)=>{const items=tpl.filter(c=>c.group===g);return `<div class="cfg-group"><div class="cfg-group-head"><div class="cfg-group-name"><b>${esc(g)}</b><span>${items.length} 項</span></div><div class="cfg-actions"><button class="cfg-ic" title="群組上移" ${gi===0?'disabled':''} onclick="cfgMoveGroup(${jsAttr(g)},-1)">${ICON.up}</button><button class="cfg-ic" title="群組下移" ${gi===groups.length-1?'disabled':''} onclick="cfgMoveGroup(${jsAttr(g)},1)">${ICON.down}</button><button class="btn cfg-sm" onclick="cfgRenameGroup(${jsAttr(g)})">重新命名</button><button class="btn cfg-sm" onclick="openNpiItemDialog('',${jsAttr(g)})">${ICON.plus}新增項目</button></div></div>${items.map((c,i)=>`<div class="cfg-row ${is3?'cfg-3d':''}"><div class="cfg-id">${esc(c.id)}</div><div class="cfg-main"><div class="cfg-cat">${esc(c.category||'—')}</div><div class="cfg-item">${esc(c.item)}</div></div><div class="cfg-std">${esc(c.standard||'—')}</div>${is3?'':`<div class="cfg-stages">${NPI_STAGES.map(s=>`<span class="${(c.stages||[]).includes(s)?'on':''}">${s}</span>`).join('')}</div>`}<div class="cfg-actions"><button class="cfg-ic" title="上移" ${i===0?'disabled':''} onclick="cfgMoveItem('${c.id}',-1)">${ICON.up}</button><button class="cfg-ic" title="下移" ${i===items.length-1?'disabled':''} onclick="cfgMoveItem('${c.id}',1)">${ICON.down}</button><button class="cfg-ic" title="修改" onclick="openNpiItemDialog('${c.id}')">${ICON.edit}</button><button class="cfg-ic danger" title="刪除" onclick="cfgDeleteItem('${c.id}')">${ICON.trash}</button></div></div>`).join('')}</div>`;}).join('');
  el.innerHTML=`<div class="topbar"><div><h1>管理者模式</h1><div class="sub">調整檢查項目範本：群組、分類、檢查項目、確認標準${is3?'':'與適用階段'}。${label} 共 ${groups.length} 個群組、${total} 項。</div></div><div class="toolbar"><button class="btn" onclick="cfgReset()">還原預設</button><button class="btn primary" onclick="openNpiItemDialog('')">${ICON.plus}新增項目</button></div></div>
- <div class="stage-tabs cfg-tabs"><button class="stage-tab ${is3?'active':''}" onclick="cfgSwitchTab('3d')">3D/模型<small>${threeDTemplate().length} 項</small></button><button class="stage-tab ${is3?'':'active'}" onclick="cfgSwitchTab('npi')">NPI<small>${npiTemplate().length} 項</small></button></div>
+ ${cfgTabsHtml()}
  <label class="cfg-sync card"><input type="checkbox" ${cfgState.sync?'checked':''} onchange="cfgToggleSync(this)"><span><b>同步套用到既有機種</b><small>開啟時，修改、新增、刪除、排序都會一併更新已建立的機種（已填的檢查結果會保留；刪除項目${is3?'':'或取消階段'}時才會移除該筆結果）。關閉時只影響之後新建立的機種。</small></span></label>
  <div class="card cfg-list">${rows||'<div class="empty"><h3>目前沒有檢查項目</h3></div>'}</div>`;}
 ensureCompetitors();
@@ -1037,25 +1445,27 @@ const sizeState={type:'all',inch:'all'};
 const DIM_LABELS={inch:'吋別',x:'X',y:'Y',z:'Z',lcdZ:'LCD',sysZ:'SYS',footZF:'前',footZR:'後',fanZ:'FanZ',cpuThermal:'CPU thermal',weight:'weight'};
 function latestDimsSrc(p){const base=p.overallDimensions||{},rows=(p.designChanges||[]).map((r,i)=>({r,i})).filter(x=>DIM_KEYS.some(k=>String(x.r[k]||'').trim())).sort((a,b)=>String(a.r.date||'').localeCompare(String(b.r.date||''))||a.i-b.i).map(x=>x.r),out={},src={};DIM_KEYS.forEach(k=>{let v='',row=null;for(let i=rows.length-1;i>=0;i--){if(String(rows[i][k]||'').trim()){v=rows[i][k];row=rows[i];break;}}if(!row&&String(base[k]||'').trim())v=base[k];out[k]=String(v||'').trim();src[k]=row;});out.date=rows.length?rows[rows.length-1].date:'';return {dims:out,src};}
 function latestDims(p){return latestDimsSrc(p).dims;}
-function sizeEntries(){const list=[];db.projects.forEach(p=>list.push({kind:'project',id:p.id,name:p.name,sub:p.designer||'',dims:latestDims(p)}));(db.competitors||[]).forEach(c=>list.push({kind:'comp',id:c.id,name:c.name,sub:c.note||'',dims:{...Object.fromEntries(DIM_KEYS.map(k=>[k,String(c[k]||'').trim()])),date:c.updatedAt||''}}));const order=db.sizeOrder||[],idx=id=>{const i=order.indexOf(id);return i<0?1e6:i;};return list.map((e,i)=>({e,i})).sort((a,b)=>idx(a.e.id)-idx(b.e.id)||a.i-b.i).map(x=>x.e);}
+function toggleSizeSync(pid,rid,on){const p=db.projects.find(x=>x.id===pid);if(!p)return;if(rid==='base')p.overallSync=Boolean(on);else{const r=(p.designChanges||[]).find(x=>x.id===rid);if(!r)return;r.sizeSync=Boolean(on);}save(on?'已同步到「機種尺寸總覽」':'已取消同步');}
+function projectSizeRows(p){const out=[],pick=o=>Object.fromEntries(DIM_KEYS.map(k=>[k,String(o[k]||'').trim()])),has=o=>DIM_KEYS.some(k=>String(o[k]||'').trim());const base=p.overallDimensions||{};if(p.overallSync&&has(base))out.push({rowId:'base',sku:'整機基準',date:'',dims:pick(base)});(p.designChanges||[]).filter(r=>r.sizeSync&&has(r)).forEach(r=>out.push({rowId:r.id,sku:(r.specItem!==undefined?r.specItem:r.task)||'設計變更',date:r.date||'',dims:pick(r)}));return out;}
+function sizeEntries(){const list=[];db.projects.forEach(p=>{const rows=projectSizeRows(p);if(!rows.length){list.push({kind:'project',id:p.id,pid:p.id,rowId:null,name:p.name,sub:p.designer||'',sku:'',pending:true,dims:{...Object.fromEntries(DIM_KEYS.map(k=>[k,''])),date:''}});return;}rows.forEach(r=>list.push({kind:'project',id:p.id+':'+r.rowId,pid:p.id,rowId:r.rowId,name:p.name,sub:p.designer||'',sku:r.sku,dims:{...r.dims,date:r.date}}));});(db.competitors||[]).forEach(c=>list.push({kind:'comp',id:c.id,name:c.name,sub:c.note||'',dims:{...Object.fromEntries(DIM_KEYS.map(k=>[k,String(c[k]||'').trim()])),date:c.updatedAt||''}}));const order=db.sizeOrder||[],idx=e=>{let i=order.indexOf(e.id);if(i<0&&e.pid)i=order.indexOf(e.pid);return i<0?1e6:i;};return list.map((e,i)=>({e,i})).sort((a,b)=>idx(a.e)-idx(b.e)||a.i-b.i).map(x=>x.e);}
 function sizeFilter(all){return all.filter(e=>(sizeState.type==='all'||(sizeState.type==='project'?e.kind==='project':e.kind==='comp'))&&(sizeState.inch==='all'||e.dims.inch===sizeState.inch));}
 function moveSize(id,dir){const all=sizeEntries(),vis=sizeFilter(all),vi=vis.findIndex(e=>e.id===id),nb=vis[vi+dir];if(!nb)return;const ids=all.map(e=>e.id),a=ids.indexOf(id),b=ids.indexOf(nb.id);[ids[a],ids[b]]=[ids[b],ids[a]];db.sizeOrder=ids;persist();renderSizes();}
 function setSizeFilter(key,v){sizeState[key]=v;renderSizes();}
 function renderSizes(){const el=document.getElementById('sizes');if(!el)return;const all=sizeEntries(),inches=[...new Set(all.map(e=>e.dims.inch).filter(Boolean))].sort((a,b)=>parseFloat(a)-parseFloat(b)||a.localeCompare(b));if(sizeState.inch!=='all'&&!inches.includes(sizeState.inch))sizeState.inch='all';
- const list=sizeFilter(all),nP=all.filter(e=>e.kind==='project').length,nC=all.length-nP,keys=DIM_KEYS;
+ const list=sizeFilter(all),nP=new Set(all.filter(e=>e.kind==='project').map(e=>e.pid)).size,nC=all.filter(e=>e.kind==='comp').length,keys=DIM_KEYS;
  const head=`<thead><tr><th rowspan="2" class="size-name-col">名稱</th>${keys.map(k=>k==='footZF'?'<th colspan="2" class="dim-group">Foot Z</th>':k==='footZR'?'':`<th rowspan="2">${DIM_LABELS[k]}</th>`).join('')}<th rowspan="2">更新</th><th rowspan="2" class="dim-op">操作</th></tr><tr><th class="dim-sub">前</th><th class="dim-sub">後</th></tr></thead>`;
- const body=list.map((e,i)=>`<tr class="${e.kind==='comp'?'size-comp':''}"><td class="size-name-col">${e.kind==='project'?`<button class="size-link" onclick="openProject('${e.id}')">${esc(e.name)}</button>`:`<b>${esc(e.name)}</b>`}<span class="size-kind ${e.kind}">${e.kind==='project'?'機種':'競品'}</span>${e.sub?`<small>${esc(e.sub)}</small>`:''}</td>${keys.map(k=>`<td class="${e.dims[k]?'':'size-empty'}">${esc(e.dims[k]||'—')}</td>`).join('')}<td class="size-date">${e.dims.date?esc(dateTextYear(e.dims.date)):'—'}</td><td class="dim-op"><div class="size-ops"><button class="cfg-ic" title="上移" ${i===0?'disabled':''} onclick="moveSize('${e.id}',-1)">${ICON.up}</button><button class="cfg-ic" title="下移" ${i===list.length-1?'disabled':''} onclick="moveSize('${e.id}',1)">${ICON.down}</button><button class="change-edit" onclick="${e.kind==='comp'?`openCompetitorDialog('${e.id}')`:`openProjectSizeDialog('${e.id}')`}">修改</button>${e.kind==='comp'?`<button class="cfg-ic danger size-x" title="刪除此競品" aria-label="刪除此競品" onclick="deleteCompetitor('${e.id}')">${ICON.x}</button>`:`<span class="size-x-gap" title="機種需回到該機種的設計歷程刪除"></span>`}</div></td></tr>`).join('');
- el.innerHTML=`<div class="topbar"><div><h1>機種尺寸總覽</h1><div class="sub">各機種最新的整機尺寸會自動帶入（取自各機種「設計歷程」的尺寸記錄，每個欄位取最新有填的值），並可自行新增競品尺寸作比較。</div></div><div class="toolbar"><button class="btn primary" onclick="openCompetitorDialog('')">${ICON.plus}新增競品尺寸</button></div></div>
+ const body=list.map((e,i)=>`<tr class="${e.kind==='comp'?'size-comp':''} ${e.pending?'size-pending':''}"><td class="size-name-col">${e.kind==='project'?`<button class="size-link" onclick="openProject('${e.pid}')">${esc(e.name)}</button>`:`<b>${esc(e.name)}</b>`}<span class="size-kind ${e.kind}">${e.kind==='project'?'機種':'競品'}</span>${e.sku?`<span class="size-sku">${esc(e.sku)}</span>`:''}${e.pending?'<small>尚未勾選同步（到設計歷程「整機尺寸」打勾）</small>':(e.sub?`<small>${esc(e.sub)}</small>`:'')}</td>${keys.map(k=>`<td class="${e.dims[k]?'':'size-empty'}">${esc(e.dims[k]||'—')}</td>`).join('')}<td class="size-date">${e.dims.date?esc(dateTextYear(e.dims.date)):'—'}</td><td class="dim-op"><div class="size-ops"><button class="cfg-ic" title="上移" ${i===0?'disabled':''} onclick="moveSize('${e.id}',-1)">${ICON.up}</button><button class="cfg-ic" title="下移" ${i===list.length-1?'disabled':''} onclick="moveSize('${e.id}',1)">${ICON.down}</button>${e.pending?`<button class="change-edit" onclick="openProject('${e.pid}')">前往設定</button>`:`<button class="change-edit" onclick="${e.kind==='comp'?`openCompetitorDialog('${e.id}')`:`openProjectSizeDialog('${e.pid}','${e.rowId}')`}">修改</button>`}${e.kind==='comp'?`<button class="cfg-ic danger size-x" title="刪除此競品" aria-label="刪除此競品" onclick="deleteCompetitor('${e.id}')">${ICON.x}</button>`:(e.pending?`<span class="size-x-gap"></span>`:`<button class="cfg-ic size-x" title="取消同步（不會刪除設計歷程裡的尺寸記錄）" aria-label="取消同步" onclick="toggleSizeSync('${e.pid}','${e.rowId}',false)">${ICON.minus}</button>`)}</div></td></tr>`).join('');
+ el.innerHTML=`<div class="topbar"><div><h1>機種尺寸總覽</h1><div class="sub">在各機種「設計歷程」的「整機尺寸」打勾，該筆尺寸才會同步到這裡；同一機種有多個 SKU 尺寸時可以同時勾選多筆。也可以自行新增競品尺寸作比較。</div></div><div class="toolbar"><button class="btn primary" onclick="openCompetitorDialog('')">${ICON.plus}新增競品尺寸</button></div></div>
  <div class="size-filters"><div class="size-seg">${[['all',`全部 ${all.length}`],['project',`機種 ${nP}`],['comp',`競品 ${nC}`]].map(([k,l])=>`<button class="${sizeState.type===k?'active':''}" onclick="setSizeFilter('type','${k}')">${l}</button>`).join('')}</div><label class="size-inch">吋別<select onchange="setSizeFilter('inch',this.value)"><option value="all">全部</option>${inches.map(i=>`<option value="${esc(i)}" ${sizeState.inch===i?'selected':''}>${esc(i)}</option>`).join('')}</select></label></div>
  <div class="card size-card">${list.length?`<div class="overall-dimensions-wrap"><table class="overall-dimensions-table size-table">${head}<tbody>${body}</tbody></table></div>`:'<div class="empty"><h3>沒有符合的資料</h3><p>調整篩選條件，或新增競品尺寸。</p></div>'}</div>`;}
 function openCompetitorDialog(id){const f=document.getElementById('competitorForm');f.reset();f.elements.namedItem('kind').value='comp';f.elements.namedItem('name').readOnly=false;document.getElementById('compNoteField').classList.remove('hidden');document.getElementById('sizeEditHint').classList.add('hidden');document.getElementById('compNameLabel').textContent='競品名稱 *';const c=id?(db.competitors||[]).find(x=>x.id===id):null;f.elements.namedItem('id').value=c?c.id:'';f.elements.namedItem('name').value=c?c.name:'';f.elements.namedItem('note').value=c?c.note||'':'';DIM_KEYS.forEach(k=>{f.elements.namedItem(k).value=c?c[k]||'':'';});document.getElementById('competitorTitle').textContent=c?'修改競品尺寸':'新增競品尺寸';document.getElementById('competitorSubmit').textContent=c?'儲存修改':'新增';competitorDialog.showModal();}
-document.getElementById('competitorForm').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));if(data.kind==='project'){const p=db.projects.find(x=>x.id===data.id);if(!p)return;const {dims,src}=latestDimsSrc(p);p.overallDimensions=p.overallDimensions||{};DIM_KEYS.forEach(k=>{const v=String(data[k]||'').trim();if((dims[k]||'')===v)return;if(src[k])src[k][k]=v;else p.overallDimensions[k]=v;});competitorDialog.close();save('機種尺寸已更新');return;}db.competitors=db.competitors||[];const vals={name:String(data.name).trim(),note:String(data.note||'').trim(),updatedAt:today(),...Object.fromEntries(DIM_KEYS.map(k=>[k,String(data[k]||'').trim()]))};if(data.id){const c=db.competitors.find(x=>x.id===data.id);if(c)Object.assign(c,vals);}else db.competitors.push({id:uid(),...vals});competitorDialog.close();save(data.id?'競品尺寸已更新':'競品尺寸已新增');};
-function openProjectSizeDialog(id){const p=db.projects.find(x=>x.id===id);if(!p)return;const f=document.getElementById('competitorForm');f.reset();f.elements.namedItem('kind').value='project';f.elements.namedItem('id').value=p.id;f.elements.namedItem('name').value=p.name;f.elements.namedItem('name').readOnly=true;document.getElementById('compNameLabel').textContent='機種';document.getElementById('compNoteField').classList.add('hidden');document.getElementById('sizeEditHint').classList.remove('hidden');const d=latestDims(p);DIM_KEYS.forEach(k=>{f.elements.namedItem(k).value=d[k]||'';});document.getElementById('competitorTitle').textContent='修改機種尺寸';document.getElementById('competitorSubmit').textContent='儲存修改';competitorDialog.showModal();}
+document.getElementById('competitorForm').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));if(data.kind==='project'){const p=db.projects.find(x=>x.id===data.id);if(!p)return;let rec;if(data.rowid==='base'){p.overallDimensions=p.overallDimensions||{};rec=p.overallDimensions;}else rec=(p.designChanges||[]).find(x=>x.id===data.rowid);if(!rec)return;DIM_KEYS.forEach(k=>{rec[k]=String(data[k]||'').trim();});competitorDialog.close();save('機種尺寸已更新');return;}db.competitors=db.competitors||[];const vals={name:String(data.name).trim(),note:String(data.note||'').trim(),updatedAt:today(),...Object.fromEntries(DIM_KEYS.map(k=>[k,String(data[k]||'').trim()]))};if(data.id){const c=db.competitors.find(x=>x.id===data.id);if(c)Object.assign(c,vals);}else db.competitors.push({id:uid(),...vals});competitorDialog.close();save(data.id?'競品尺寸已更新':'競品尺寸已新增');};
+function openProjectSizeDialog(pid,rowId){const p=db.projects.find(x=>x.id===pid);if(!p)return;const rec=rowId==='base'?(p.overallDimensions||{}):(p.designChanges||[]).find(x=>x.id===rowId);if(!rec)return;const f=document.getElementById('competitorForm');f.reset();f.elements.namedItem('kind').value='project';f.elements.namedItem('id').value=p.id;f.elements.namedItem('rowid').value=rowId;f.elements.namedItem('name').value=p.name;f.elements.namedItem('name').readOnly=true;document.getElementById('compNameLabel').textContent='機種';document.getElementById('compNoteField').classList.add('hidden');const hint=document.getElementById('sizeEditHint');hint.textContent='修改會直接寫回設計歷程裡這筆尺寸記錄（'+(rowId==='base'?'整機基準':((rec.specItem!==undefined?rec.specItem:rec.task)||'設計變更'))+'）。';hint.classList.remove('hidden');DIM_KEYS.forEach(k=>{f.elements.namedItem(k).value=rec[k]||'';});document.getElementById('competitorTitle').textContent='修改機種尺寸';document.getElementById('competitorSubmit').textContent='儲存修改';competitorDialog.showModal();}
 function deleteCompetitor(id){const c=(db.competitors||[]).find(x=>x.id===id);if(!c||!confirm(`刪除競品「${c.name}」？`))return;db.competitors=db.competitors.filter(x=>x.id!==id);save('競品尺寸已刪除');}
 /* ===== 雲端同步（Google Apps Script） ===== */
 const CLOUD_URL='https://script.google.com/macros/s/AKfycbwahfphuHB3CjXTfSX6vEEn5ZpwjV5Ireaj6DuMYHihNC83UISx9AtNW0uUm4dJALweDg/exec';   /* ← 部署 Apps Script 後，把 Web App 網址貼在這個引號裡；留空＝只存在這台電腦的瀏覽器 */
 const CLOUD_KEY_STORE=DB_KEY+'_cloudkey',CLOUD_STATE_KEY=DB_KEY+'_cloudstate';
-const CLOUD_CFG=['npiTemplate','threeDTemplate','competitors','sizeOrder'];
+const CLOUD_CFG=['npiTemplate','threeDTemplate','partTemplate','competitors','sizeOrder'];
 const DKEY_STORE=DB_KEY+'_designerkey';
 const cloud={on:Boolean(CLOUD_URL),role:'',designerKey:'',ready:false,busy:false,again:false,timer:null,known:{},snap:{},key:'',asked:false,status:'',time:'',first:true};
 (function(){const m=location.hash.match(/[#&]k=([^&]+)/);if(m){try{localStorage.setItem(CLOUD_KEY_STORE,decodeURIComponent(m[1]));}catch(e){}history.replaceState(null,'',location.pathname+location.search);}cloud.key=localStorage.getItem(CLOUD_KEY_STORE)||'';cloud.designerKey=localStorage.getItem(DKEY_STORE)||'';try{const st=JSON.parse(localStorage.getItem(CLOUD_STATE_KEY)||'null');if(st&&st.url===CLOUD_URL){cloud.known=st.known||{};cloud.snap=st.snap||{};cloud.first=false;}}catch(e){}})();
@@ -1092,12 +1502,12 @@ async function cloudPushInner(){const rec=cloudRecords(),hs=cloudHashes(rec),ops
  if(!ops.length)return;const res=await cloudCall({action:'batch',ops});if(!res.ok)throw new Error(res.error||'save failed');const conflicts=[];
  const forbidden=[];res.results.forEach((r,i)=>{const op=ops[i];if(r.forbidden)forbidden.push(op.key);else if(r.ok){if(op.op==='save'){cloud.known[op.key]=r.updatedAt;cloud.snap[op.key]=hs[op.key];}else{delete cloud.known[op.key];delete cloud.snap[op.key];}}else if(r.conflict)conflicts.push({op,r});});
  cloudSaveState();if(conflicts.length){cloudApplyConflicts(conflicts);cloudSaveState();}
- if(forbidden.length){const cur=await cloudCall({action:'load'});forbidden.forEach(k=>{if(cur.records&&cur.records[k]){adoptRecord(k,cur.records[k].data);cloud.known[k]=cur.records[k].updatedAt;}});cloudNormalize();const rec=cloudRecords();forbidden.forEach(k=>{if(rec[k]!==undefined)cloud.snap[k]=hashStr(JSON.stringify(rec[k]));});rawPersist();cloudSaveState();render();toast('此項設定只有管理者可以修改，已還原為雲端版本',4200);}}
+ if(forbidden.length){const cur=await cloudCall({action:'load'});let reverted=false;forbidden.forEach(k=>{if(cur.records&&cur.records[k]){adoptRecord(k,cur.records[k].data);cloud.known[k]=cur.records[k].updatedAt;reverted=true;}});cloudNormalize();const rec=cloudRecords();forbidden.forEach(k=>{if(rec[k]!==undefined)cloud.snap[k]=hashStr(JSON.stringify(rec[k]));});rawPersist();cloudSaveState();render();if(reverted)toast('此項設定只有管理者可以修改，已還原為雲端版本',4200);}}
 async function cloudSync(){if(!cloud.on||cloud.busy)return;cloud.busy=true;setSync('syncing');try{if(cloud.ready)await cloudPushInner();await cloudPull();if(!cloud.on)return;cloud.ready=true;await cloudPushInner();setSync('ok');}catch(e){if(cloud.status!=='auth')setSync('offline');}finally{cloud.busy=false;if(cloud.again){cloud.again=false;cloudSchedule();}}}
 function cloudSchedule(){if(!cloud.on)return;clearTimeout(cloud.timer);setSync('pending');cloud.timer=setTimeout(async()=>{if(cloud.busy){cloud.again=true;return;}if(!cloud.ready){cloudSync();return;}cloud.busy=true;setSync('syncing');try{await cloudPushInner();setSync('ok');}catch(e){if(cloud.status!=='auth')setSync('offline');}finally{cloud.busy=false;if(cloud.again){cloud.again=false;cloudSchedule();}}},900);}
 function cloudIdle(){const a=document.activeElement;return !document.querySelector('dialog[open]')&&!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));}
 function cloudInit(){if(!cloud.on)return;setSync('syncing');cloudSync();document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloud.ready&&cloudIdle())cloudSync();});setInterval(()=>{if(!document.hidden&&cloud.ready&&cloudIdle())cloudSync();},90000);}
-function render(){renderDesigner();renderAdmin();renderSizes();renderConfig();if(state.projectId)renderDetail();}
+function render(){renderDesigner();renderAdmin();renderSizes();renderConfig();if(state.projectId)renderDetail();const bd=document.getElementById('planBoardDlg');if(bd&&bd.open)renderPlanBoard();}
 render();
 restoreNav();
 cloudInit();
